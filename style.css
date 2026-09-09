@@ -167,6 +167,10 @@ td {
   text-align: justify;
 }
 
+.content p:has(> small > em) {
+  text-align: right;
+}
+
 .content figure {
   margin: 16px 0;
   width: 100%;
