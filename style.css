@@ -163,6 +163,26 @@ td {
     text-decoration: underline;
 }
 
+.content p {
+  text-align: justify;
+}
+
+.content figure {
+  margin: 16px 0;
+  width: 100%;
+}
+
+.content figcaption {
+  text-align: center;
+}
+
+.content img {
+  width: 100%;
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
 /* ---------- Sidebar tautan eksternal ---------- */
 .sidebar {
     background: linear-gradient(160deg, #eef6f5, #dcecea) !important;
