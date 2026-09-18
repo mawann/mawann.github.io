@@ -1,0 +1,26 @@
+Media Pembelajaran Interaktif
+
+https://phet.colorado.edu/ apakah bisa membuat seperti website ini 
+
+Analisa dengan memposisikan AI sebagai guru profesional DKV dengan memperhatikan 
+Elemen : Desain Komunikasi Visual (Perancangan UI/UX)
+Capaian Pembelajaran : Pada akhir fase F, peserta didik mampu menerapkan prinsip-prinsip perancangan Antarmuka Pengguna (User Interface/UI) dan Pengalaman Pengguna (User Experience/UX), meliputi pembuatan user persona, wireframing, pemetaan alur pengguna (user flow), pembuatan prototipe interaktif (interactive prototyping), hingga pengujian keterpakaian (usability testing) produk digital.
+Tujuan Pembelajaran : 
+1. Peserta didik mampu menganalisis kebutuhan pengguna melalui pembuatan User Persona dan Information Architecture (IA).
+2. Peserta didik mampu merancang tata letak dan alur aplikasi melalui Wireframing (Low-Fidelity).
+3. Peserta didik mampu mengaplikasikan prinsip visual UI (kombinasi warna, tipografi, hirarki visual, dan komponen komponen UI) ke dalam High-Fidelity Design.
+4. Peserta didik mampu membuat Prototyping Interaktif serta melakukan Usability Testing menggunakan metode System Usability Scale (SUS).
+
+Selanjutnya buatkan referensi Media Pembelajaran Interaktif (MPI) yang telah terimplementasikan Pembelajaran Mendalam (Deep Learning) dan Koding Kecerdasan Artifisial (AI Coding integration). 
+
+Sesuaikan isi materi:
+1. MATERI 1: Fondasi UI/UX, Research, & User Persona Analysis
+2. MATERI 2: Information Architecture (IA) & Wireframing (Lo-Fi Design)
+3. MATERI 3: Visual Design System & High-Fidelity UI Prototyping
+4. MATERI 4: Usability Testing & Iterative Design Evaluation
+
+Tambahkan login peserta didik dengan nama, kelas, no absen. Dan tambahkan kuisnya dengan model HOTS. Buatkan database dengan penggunaan MPI ini (nama siswa, kelas, no absen, dan nilai siswa mengerjakan kuis).
+
+Simulator
+Untuk pelajaran: Desain UI/UX (Program Keahlian Desain Komunikasi Visual)
+Dengan materi: Simulator Interaktif Prinsip Hirarki Visual & Responsive Layout Prototyping (Simulasi Real-time adjustment grid, contrast ratio WCAG, typography scale, serta perbaikan UX flow).
