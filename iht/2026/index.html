@@ -1,1078 +1,1183 @@
-<script>
-import React, { useState, useEffect, useMemo } from 'react';
-import { 
-  User, BookOpen, Sliders, CheckCircle, BarChart3, Database, 
-  Sparkles, Award, RotateCcw, Eye, Play, ChevronRight, Layers, 
-  Palette, Type, Grid, Smartphone, Monitor, Tablet, HelpCircle, 
-  AlertTriangle, RefreshCw, Send, Download, FileText, Check, X, Search
-} from 'lucide-react';
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MPI UI/UX DKV - Media Pembelajaran Interaktif</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- React & ReactDOM CDN -->
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+    <!-- Babel Standalone for JSX compiling in browser -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <style>
+      /* Custom scrollbar styling for clean UI */
+      ::-webkit-scrollbar { width: 6px; height: 6px; }
+      ::-webkit-scrollbar-track { background: #0f172a; }
+      ::-webkit-scrollbar-thumb { background: #334155; border-radius: 9999px; }
+      ::-webkit-scrollbar-thumb:hover { background: #475569; }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100 font-sans antialiased selection:bg-blue-500 selection:text-white">
+    <div id="root"></div>
 
-// WCAG Relative Luminance & Contrast Ratio Calculator
-const getLuminance = (r, g, b) => {
-  const a = [r, g, b].map(v => {
-    v /= 255;
-    return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
-  });
-  return a[0] * 0.2126 + a[1] * 0.7152 + a[2] * 0.0722;
-};
+    <script type="text/babel">
+      // Self-contained SVG Icons for zero-dependency hosting on GitHub Pages
+      const Icon = ({ name, className = "w-4 h-4" }) => {
+        const icons = {
+          Sparkles: (
+            <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/>
+            </svg>
+          ),
+          BookOpen: (
+            <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+            </svg>
+          ),
+          Sliders: (
+            <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"/>
+            </svg>
+          ),
+          CheckCircle: (
+            <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+          ),
+          Database: (
+            <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4"/>
+            </svg>
+          ),
+          Layers: (
+            <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
+            </svg>
+          ),
+          Smartphone: (
+            <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+            </svg>
+          ),
+          Tablet: (
+            <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 18h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+            </svg>
+          ),
+          Monitor: (
+            <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+            </svg>
+          ),
+          Grid: (
+            <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/>
+            </svg>
+          ),
+          Palette: (
+            <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 21a4 4 0 01-4-4c0-1.423.597-2.72 1.547-3.647L12 4.5l7.453 8.853A4.99 4.99 0 0121 17a4 4 0 01-4 4h-2.172a2 2 0 01-1.414-.586l-.828-.828A2 2 0 0011.172 19H7z"/>
+            </svg>
+          ),
+          Type: (
+            <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16m-7 6h7"/>
+            </svg>
+          ),
+          AlertTriangle: (
+            <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+            </svg>
+          ),
+          Eye: (
+            <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+            </svg>
+          ),
+          Play: (
+            <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/>
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+          ),
+          ChevronRight: (
+            <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"/>
+            </svg>
+          ),
+          Check: (
+            <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"/>
+            </svg>
+          ),
+          X: (
+            <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"/>
+            </svg>
+          ),
+          Send: (
+            <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/>
+            </svg>
+          ),
+          RefreshCw: (
+            <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+            </svg>
+          ),
+          Download: (
+            <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+            </svg>
+          )
+        };
+        return icons[name] || <span className="inline-block w-4 h-4 bg-slate-700 rounded" />;
+      };
 
-const hexToRgb = (hex) => {
-  const shorthandRegex = /^#?([a-f\d])([a-f\d])([a-f\d])$/i;
-  hex = hex.replace(shorthandRegex, (m, r, g, b) => r + r + g + g + b + b);
-  const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-  return result ? {
-    r: parseInt(result[1], 16),
-    g: parseInt(result[2], 16),
-    b: parseInt(result[3], 16)
-  } : { r: 0, g: 0, b: 0 };
-};
+      // WCAG Relative Luminance & Contrast Ratio Calculator
+      const getLuminance = (r, g, b) => {
+        const a = [r, g, b].map(v => {
+          v /= 255;
+          return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
+        });
+        return a[0] * 0.2126 + a[1] * 0.7152 + a[2] * 0.0722;
+      };
 
-const calculateContrastRatio = (color1Hex, color2Hex) => {
-  const rgb1 = hexToRgb(color1Hex);
-  const rgb2 = hexToRgb(color2Hex);
-  const l1 = getLuminance(rgb1.r, rgb1.g, rgb1.b);
-  const l2 = getLuminance(rgb2.r, rgb2.g, rgb2.b);
-  const lighter = Math.max(l1, l2);
-  const darker = Math.min(l1, l2);
-  return (lighter + 0.05) / (darker + 0.05);
-};
+      const hexToRgb = (hex) => {
+        const shorthandRegex = /^#?([a-f\d])([a-f\d])([a-f\d])$/i;
+        hex = hex.replace(shorthandRegex, (m, r, g, b) => r + r + g + g + b + b);
+        const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+        return result ? {
+          r: parseInt(result[1], 16),
+          g: parseInt(result[2], 16),
+          b: parseInt(result[3], 16)
+        } : { r: 0, g: 0, b: 0 };
+      };
 
-const CURRICULUM = [
-  {
-    id: 1,
-    title: "MATERI 1: Fondasi UI/UX, Research & User Persona Analysis",
-    description: "Memahami perbedaan mendasar UI dan UX, metodologi Design Thinking, serta cara membuat User Persona yang representatif.",
-    badge: "User Research",
-    concepts: [
-      { topic: "UX vs UI", text: "UX (User Experience) berfokus pada rasa, alur, dan efisiensi pengguna saat menyelesaikan masalah. UI (User Interface) berfokus pada penampilan visual, keindahan, dan estetika visual komunikasi." },
-      { topic: "User Persona", text: "Fiktif namun berbasis data empiris dari wawancara pengguna. Terdiri dari Pain Points, Goals, Motivations, dan Behavior patterns." },
-      { topic: "Deep Learning Activity", text: "Diskusikan: Mengapa rancangan antarmuka yang indah secara visual tetap bisa gagal jika User Flow-nya rumit?" }
-    ],
-    aiPromptExample: "Buatkan 5 daftar pertanyaan wawancara mendalam (Empathy Interview) untuk calon pengguna aplikasi pemesanan kantin sekolah berdurasi 15 menit.",
-    quiz: [
-      {
-        id: "q1_1",
-        question: "Sebuah aplikasi E-Learning memiliki desain visual modern dengan warna cyan terang dan animasi halus. Namun, 78% siswa gagal menemukan tombol 'Kumpul Tugas' dalam waktu kurang dari 30 detik. Berdasarkan kasus ini, analisis kegagalan utama produk digital tersebut adalah...",
-        options: [
-          "Kegagalan UI karena animasi terlalu lambat",
-          "Kegagalan UX karena informasi arsitektur & hirarki aksi pengguna tidak intuitif",
-          "Kekurangan fitur AI generator jawaban kuis",
-          "Kesalahan pemilihan skema warna kontras rendah pada latar belakang"
-        ],
-        correct: 1,
-        explanation: "Indah (UI menarik) tidak menjamin kemudahan penggunaan (UX). Kasus ini menunjukkan kelemahan arsitektur informasi dan penempatan Call-to-Action (CTA) yang tersembunyi."
-      },
-      {
-        id: "q1_2",
-        question: "Saat merancang User Persona untuk aplikasi tabungan siswa SMK, data manakah yang paling kritikal untuk menentukan fitur prioritas?",
-        options: [
-          "Warna favorit dan merk smartphone yang digunakan",
-          "Hobi akhir pekan dan tipe musik yang didengar",
-          "Frustrasi finansial siswa (pain points) dan tujuan menghemat uang (goals)",
-          "Jumlah pengikut di media sosial"
-        ],
-        correct: 2,
-        explanation: "User Persona yang efektif berfokus pada Pain Points dan Goals untuk mendorong keputusan fitur (feature prioritization)."
-      }
-    ]
-  },
-  {
-    id: 2,
-    title: "MATERI 2: Information Architecture (IA) & Wireframing (Lo-Fi)",
-    description: "Merancang taksonomi navigasi aplikasi (Sitemap) dan membuat struktur Low-Fidelity Wireframe sebelum visualisasi warna.",
-    badge: "Structural Design",
-    concepts: [
-      { topic: "Information Architecture (IA)", text: "Struktur hierarki menu dan konten yang memudahkan pengguna mengetahui lokasi mereka saat ini dan tujuan selanjutnya." },
-      { topic: "Low-Fidelity Wireframe", text: "Bagan cetak biru skala abu-abu (greyscale) tanpa foto/warna akhir. Fokus pada layout grid, proporsi, dan fungsi tata letak." },
-      { topic: "Card Sorting", text: "Metode mengelompokkan ide menu bersama calon pengguna untuk menentukan taksonomi kategori." }
-    ],
-    aiPromptExample: "Hasilkan struktur Sitemap berbentuk hirarki JSON untuk aplikasi portofolio digital siswa DKV yang mencakup karya 2D, 3D, dan UI Design.",
-    quiz: [
-      {
-        id: "q2_1",
-        question: "Mengapa desainer UI/UX profesional selalu memprioritaskan pembuatan Low-Fidelity Wireframe sebelum memasuki tahap High-Fidelity Design?",
-        options: [
-          "Untuk mempercepat pengerjaan visual dan penghematan warna",
-          "Agar klien fokus menguji struktur alur dan fungsi layout tanpa terdistraksi oleh pilihan warna & estetika gambar",
-          "Karena wireframe low-fidelity otomatis dapat diubah menjadi kode program",
-          "Untuk memenuhi standar ISO perancangan grafis DKV"
-        ],
-        correct: 1,
-        explanation: "Lo-Fi Wireframe memisahkan pengujian struktur/fungsi dari distraksi visual (warna, font, lukisan detail)."
-      }
-    ]
-  },
-  {
-    id: 3,
-    title: "MATERI 3: Visual Design System & High-Fidelity Prototyping",
-    description: "Menerapkan prinsip hirarki visual, typography scale, WCAG accessibility, dan Design Tokens ke dalam mockup presisi tinggi.",
-    badge: "Hi-Fi & Systems",
-    concepts: [
-      { topic: "Design Tokens", text: "Variabel terpusat untuk warna, jarak (spacing), radius, dan font yang menjaga konsistensi lintas halaman." },
-      { topic: "Modular Type Scale", text: "Rasio penggandaan ukuran font (misal 1.25 Major Third) untuk menciptakan ritme bacaan yang sistematis." },
-      { topic: "WCAG 2.1 Contrast", text: "Standar aksesibilitas teks terhadap background (minimal rasio 4.5:1 untuk teks normal / Level AA)." }
-    ],
-    aiPromptExample: "Buatkan skema warna CSS Design Tokens berbasis Tailwind CSS untuk aplikasi edukasi ramah anak dengan tingkat aksesibilitas WCAG AAA.",
-    quiz: [
-      {
-        id: "q3_1",
-        question: "Seorang desainer memilih kombinasi warna teks #777777 di atas latar belakang #EEEEEE untuk tombol utama. Setelah diuji, rasio kontrasnya 2.8:1. Dampak dari desain ini sesuai standar WCAG adalah...",
-        options: [
-          "Desain dinilai sangat minimalis dan modern",
-          "Gagal memenuhi standar aksesibilitas WCAG AA (minimal 4.5:1), menyulitkan pengguna dengan gangguan penglihatan atau di bawah sinar matahari",
-          "Tingkat keterbacaan meningkat karena warna yang tidak kontras",
-          "Tombol otomatis membesar di layar smartphone"
-        ],
-        correct: 1,
-        explanation: "Standar WCAG 2.1 merekomendasikan kontras minimal 4.5:1 untuk teks biasa agar inklusif dan terbaca dalam berbagai kondisi cahaya."
-      }
-    ]
-  },
-  {
-    id: 4,
-    title: "MATERI 4: Usability Testing & Iterative Design Evaluation",
-    description: "Melakukan pengujian keterpakaian langsung kepada calon pengguna menggunakan kalkulasi kuantitatif System Usability Scale (SUS).",
-    badge: "Evaluation & Testing",
-    concepts: [
-      { topic: "System Usability Scale (SUS)", text: "Kuesioner 10 pertanyaan baku skala Likert (1-5) untuk mengukur tingkat usabilitas produk. Skor rata-rata industri adalah 68." },
-      { topic: "Iterative Redesign", text: "Proses perbaikan berkelanjutan berdasarkan temuan keraguan pengguna (usability friction) saat tes tugas (Task Scenario)." },
-      { topic: "Qualitative Insight", text: "Catatan pengamatan verbal dan gestur pengguna saat mereka mengalami kebingungan di halaman tertentu." }
-    ],
-    aiPromptExample: "Analisis hasil kalkulasi kuesioner SUS dengan skor total 52.5. Berikan 3 rekomendasi aksi iterasi perbaikan UX mendesak.",
-    quiz: [
-      {
-        id: "q4_1",
-        question: "Setelah dilakukan Usability Testing pada prototipe aplikasi DKV, diperoleh skor SUS sebesar 54.0. Bagaimana kesimpulan rekomendasi desain yang harus diambil tim DKV?",
-        options: [
-          "Aplikasi siap diluncurkan karena skor berada di atas 50",
-          "Aplikasi tergolong di bawah rata-rata (Grade F/Poor). Diperlukan evaluasi ulang pada alur navigasi dan kemudahan tugas",
-          "Hanya warna latar belakang yang perlu diganti ke hitam",
-          "Skor SUS tidak valid jika pengguna kurang dari 1000 orang"
-        ],
-        correct: 1,
-        explanation: "Skor SUS rata-rata nasional/global adalah 68. Skor 54 berada dalam kategori 'Poor / Not Acceptable', menuntut perbaikan mendasar pada UX alur kerja."
-      }
-    ]
-  }
-];
+      const calculateContrastRatio = (color1Hex, color2Hex) => {
+        const rgb1 = hexToRgb(color1Hex);
+        const rgb2 = hexToRgb(color2Hex);
+        const l1 = getLuminance(rgb1.r, rgb1.g, rgb1.b);
+        const l2 = getLuminance(rgb2.r, rgb2.g, rgb2.b);
+        const lighter = Math.max(l1, l2);
+        const darker = Math.min(l1, l2);
+        return (lighter + 0.05) / (darker + 0.05);
+      };
 
-const INITIAL_DATABASE = [
-  { id: "STD-01", name: "Ahmad Rizky", class: "XII DKV 1", absent: "03", scoreM1: 100, scoreM2: 100, scoreM3: 100, scoreM4: 100, totalScore: 100, susSimScore: 85, status: "Tuntas" },
-  { id: "STD-02", name: "Siti Nurhaliza", class: "XII DKV 1", absent: "28", scoreM1: 100, scoreM2: 100, scoreM3: 50, scoreM4: 100, totalScore: 87.5, susSimScore: 78, status: "Tuntas" },
-  { id: "STD-03", name: "Budi Santoso", class: "XII DKV 2", absent: "08", scoreM1: 50, scoreM2: 100, scoreM3: 50, scoreM4: 50, totalScore: 62.5, susSimScore: 60, status: "Remedial" }
-];
+      const CURRICULUM = [
+        {
+          id: 1,
+          title: "MATERI 1: Fondasi UI/UX, Research & User Persona Analysis",
+          description: "Memahami perbedaan mendasar UI dan UX, metodologi Design Thinking, serta cara membuat User Persona yang representatif.",
+          badge: "User Research",
+          concepts: [
+            { topic: "UX vs UI", text: "UX (User Experience) berfokus pada rasa, alur, dan efisiensi pengguna saat menyelesaikan masalah. UI (User Interface) berfokus pada penampilan visual, keindahan, dan estetika komunikasi visual." },
+            { topic: "User Persona", text: "Fiktif namun berbasis data empiris dari wawancara pengguna. Terdiri dari Pain Points, Goals, Motivations, dan Behavior patterns." },
+            { topic: "Deep Learning Activity", text: "Diskusikan: Mengapa rancangan antarmuka yang indah secara visual tetap bisa gagal jika User Flow-nya rumit?" }
+          ],
+          aiPromptExample: "Buatkan 5 daftar pertanyaan wawancara mendalam (Empathy Interview) untuk calon pengguna aplikasi pemesanan kantin sekolah berdurasi 15 menit.",
+          quiz: [
+            {
+              id: "q1_1",
+              question: "Sebuah aplikasi E-Learning memiliki desain visual modern dengan warna cyan terang dan animasi halus. Namun, 78% siswa gagal menemukan tombol 'Kumpul Tugas' dalam waktu kurang dari 30 detik. Berdasarkan kasus ini, analisis kegagalan utama produk digital tersebut adalah...",
+              options: [
+                "Kegagalan UI karena animasi terlalu lambat",
+                "Kegagalan UX karena arsitektur informasi & hirarki aksi pengguna tidak intuitif",
+                "Kekurangan fitur AI generator jawaban kuis",
+                "Kesalahan pemilihan skema warna kontras rendah pada latar belakang"
+              ],
+              correct: 1,
+              explanation: "Indah (UI menarik) tidak menjamin kemudahan penggunaan (UX). Kasus ini menunjukkan kelemahan arsitektur informasi dan penempatan Call-to-Action (CTA) yang tersembunyi."
+            },
+            {
+              id: "q1_2",
+              question: "Saat merancang User Persona untuk aplikasi tabungan siswa SMK, data manakah yang paling kritikal untuk menentukan fitur prioritas?",
+              options: [
+                "Warna favorit dan merk smartphone yang digunakan",
+                "Hobi akhir pekan dan tipe musik yang didengar",
+                "Frustrasi finansial siswa (pain points) dan tujuan menghemat uang (goals)",
+                "Jumlah pengikut di media sosial"
+              ],
+              correct: 2,
+              explanation: "User Persona yang efektif berfokus pada Pain Points dan Goals untuk mendorong keputusan fitur (feature prioritization)."
+            }
+          ]
+        },
+        {
+          id: 2,
+          title: "MATERI 2: Information Architecture (IA) & Wireframing (Lo-Fi)",
+          description: "Merancang taksonomi navigasi aplikasi (Sitemap) dan membuat struktur Low-Fidelity Wireframe sebelum visualisasi warna.",
+          badge: "Structural Design",
+          concepts: [
+            { topic: "Information Architecture (IA)", text: "Struktur hierarki menu dan konten yang memudahkan pengguna mengetahui lokasi mereka saat ini dan tujuan selanjutnya." },
+            { topic: "Low-Fidelity Wireframe", text: "Bagan cetak biru skala abu-abu (greyscale) tanpa foto/warna akhir. Fokus pada layout grid, proporsi, dan fungsi tata letak." },
+            { topic: "Card Sorting", text: "Metode mengelompokkan ide menu bersama calon pengguna untuk menentukan taksonomi kategori." }
+          ],
+          aiPromptExample: "Hasilkan struktur Sitemap berbentuk hirarki JSON untuk aplikasi portofolio digital siswa DKV yang mencakup karya 2D, 3D, dan UI Design.",
+          quiz: [
+            {
+              id: "q2_1",
+              question: "Mengapa desainer UI/UX profesional selalu memprioritaskan pembuatan Low-Fidelity Wireframe sebelum memasuki tahap High-Fidelity Design?",
+              options: [
+                "Untuk mempercepat pengerjaan visual dan penghematan warna",
+                "Agar klien fokus menguji struktur alur dan fungsi layout tanpa terdistraksi oleh pilihan warna & estetika gambar",
+                "Karena wireframe low-fidelity otomatis dapat diubah menjadi kode program",
+                "Untuk memenuhi standar ISO perancangan grafis DKV"
+              ],
+              correct: 1,
+              explanation: "Lo-Fi Wireframe memisahkan pengujian struktur/fungsi dari distraksi visual (warna, font, lukisan detail)."
+            }
+          ]
+        },
+        {
+          id: 3,
+          title: "MATERI 3: Visual Design System & High-Fidelity Prototyping",
+          description: "Menerapkan prinsip hirarki visual, typography scale, WCAG accessibility, dan Design Tokens ke dalam mockup presisi tinggi.",
+          badge: "Hi-Fi & Systems",
+          concepts: [
+            { topic: "Design Tokens", text: "Variabel terpusat untuk warna, jarak (spacing), radius, dan font yang menjaga konsistensi lintas halaman." },
+            { topic: "Modular Type Scale", text: "Rasio penggandaan ukuran font (misal 1.25 Major Third) untuk menciptakan ritme bacaan yang sistematis." },
+            { topic: "WCAG 2.1 Contrast", text: "Standar aksesibilitas teks terhadap background (minimal rasio 4.5:1 untuk teks normal / Level AA)." }
+          ],
+          aiPromptExample: "Buatkan skema warna CSS Design Tokens berbasis Tailwind CSS untuk aplikasi edukasi ramah anak dengan tingkat aksesibilitas WCAG AAA.",
+          quiz: [
+            {
+              id: "q3_1",
+              question: "Seorang desainer memilih kombinasi warna teks #777777 di atas latar belakang #EEEEEE untuk tombol utama. Setelah diuji, rasio kontrasnya 2.8:1. Dampak dari desain ini sesuai standar WCAG adalah...",
+              options: [
+                "Desain dinilai sangat minimalis dan modern",
+                "Gagal memenuhi standar aksesibilitas WCAG AA (minimal 4.5:1), menyulitkan pengguna dengan gangguan penglihatan atau di bawah sinar matahari",
+                "Tingkat keterbacaan meningkat karena warna yang tidak kontras",
+                "Tombol otomatis membesar di layar smartphone"
+              ],
+              correct: 1,
+              explanation: "Standar WCAG 2.1 merekomendasikan kontras minimal 4.5:1 untuk teks biasa agar inklusif dan terbaca dalam berbagai kondisi cahaya."
+            }
+          ]
+        },
+        {
+          id: 4,
+          title: "MATERI 4: Usability Testing & Iterative Design Evaluation",
+          description: "Melakukan pengujian keterpakaian langsung kepada calon pengguna menggunakan kalkulasi kuantitatif System Usability Scale (SUS).",
+          badge: "Evaluation & Testing",
+          concepts: [
+            { topic: "System Usability Scale (SUS)", text: "Kuesioner 10 pertanyaan baku skala Likert (1-5) untuk mengukur tingkat usabilitas produk. Skor rata-rata industri adalah 68." },
+            { topic: "Iterative Redesign", text: "Proses perbaikan berkelanjutan berdasarkan temuan keraguan pengguna (usability friction) saat tes tugas (Task Scenario)." },
+            { topic: "Qualitative Insight", text: "Catatan pengamatan verbal dan gestur pengguna saat mereka mengalami kebingungan di halaman tertentu." }
+          ],
+          aiPromptExample: "Analisis hasil kalkulasi kuesioner SUS dengan skor total 52.5. Berikan 3 rekomendasi aksi iterasi perbaikan UX mendesak.",
+          quiz: [
+            {
+              id: "q4_1",
+              question: "Setelah dilakukan Usability Testing pada prototipe aplikasi DKV, diperoleh skor SUS sebesar 54.0. Bagaimana kesimpulan rekomendasi desain yang harus diambil tim DKV?",
+              options: [
+                "Aplikasi siap diluncurkan karena skor berada di atas 50",
+                "Aplikasi tergolong di bawah rata-rata (Grade F/Poor). Diperlukan evaluasi ulang pada alur navigasi dan kemudahan tugas",
+                "Hanya warna latar belakang yang perlu diganti ke hitam",
+                "Skor SUS tidak valid jika pengguna kurang dari 1000 orang"
+              ],
+              correct: 1,
+              explanation: "Skor SUS rata-rata nasional/global adalah 68. Skor 54 berada dalam kategori 'Poor / Not Acceptable', menuntut perbaikan mendasar pada UX alur kerja."
+            }
+          ]
+        }
+      ];
 
-export default function App() {
-  // Authentication / User State
-  const [user, setUser] = useState({ name: '', class: 'XII DKV 1', absent: '', loggedIn: false });
-  const [activeTab, setActiveTab] = useState('materi'); // materi, simulator, quiz, database, ai-mentor
-  const [currentModuleIdx, setCurrentModuleIdx] = useState(0);
+      const INITIAL_DATABASE = [
+        { id: "STD-01", name: "Ahmad Rizky", class: "XII DKV 1", absent: "03", scoreM1: 100, scoreM2: 100, scoreM3: 100, scoreM4: 100, totalScore: 100, susSimScore: 85, status: "Tuntas" },
+        { id: "STD-02", name: "Siti Nurhaliza", class: "XII DKV 1", absent: "28", scoreM1: 100, scoreM2: 100, scoreM3: 50, scoreM4: 100, totalScore: 87.5, susSimScore: 78, status: "Tuntas" },
+        { id: "STD-03", name: "Budi Santoso", class: "XII DKV 2", absent: "08", scoreM1: 50, scoreM2: 100, scoreM3: 50, scoreM4: 50, totalScore: 62.5, susSimScore: 60, status: "Remedial" }
+      ];
 
-  // Database State
-  const [studentDb, setStudentDb] = useState(INITIAL_DATABASE);
+      function App() {
+        // User Login State
+        const [user, setUser] = React.useState({ name: '', class: 'XI DKV 1', absent: '', loggedIn: false });
+        const [activeTab, setActiveTab] = React.useState('materi'); 
+        const [currentModuleIdx, setCurrentModuleIdx] = React.useState(0);
 
-  // Quiz State
-  const [quizAnswers, setQuizAnswers] = useState({});
-  const [quizSubmitted, setQuizSubmitted] = useState(false);
-  const [moduleScores, setModuleScores] = useState({ m1: null, m2: null, m3: null, m4: null });
+        // Database & Scores State
+        const [studentDb, setStudentDb] = React.useState(INITIAL_DATABASE);
+        const [quizAnswers, setQuizAnswers] = React.useState({});
+        const [quizSubmitted, setQuizSubmitted] = React.useState(false);
+        const [moduleScores, setModuleScores] = React.useState({ m1: null, m2: null, m3: null, m4: null });
 
-  // PhET Simulator States
-  const [simViewport, setSimViewport] = useState('desktop'); // mobile, tablet, desktop
-  const [simGridCols, setSimGridCols] = useState(4);
-  const [simGap, setSimGap] = useState(16);
-  const [simMargin, setSimMargin] = useState(24);
-  const [simBgColor, setSimBgColor] = useState('#F3F4F6');
-  const [simCardBg, setSimCardBg] = useState('#FFFFFF');
-  const [simTextColor, setSimTextColor] = useState('#1F2937');
-  const [simPrimaryColor, setSimPrimaryColor] = useState('#2563EB');
-  const [simTypeScale, setSimTypeScale] = useState(1.25); // Major Third
-  const [simHeadingWeight, setSimHeadingWeight] = useState('700');
-  const [simFixFlowFriction, setSimFixFlowFriction] = useState(false);
+        // PhET Simulator States
+        const [simViewport, setSimViewport] = React.useState('desktop');
+        const [simGridCols, setSimGridCols] = React.useState(4);
+        const [simGap, setSimGap] = React.useState(16);
+        const [simMargin, setSimMargin] = React.useState(24);
+        const [simBgColor, setSimBgColor] = React.useState('#F3F4F6');
+        const [simCardBg, setSimCardBg] = React.useState('#FFFFFF');
+        const [simTextColor, setSimTextColor] = React.useState('#1F2937');
+        const [simPrimaryColor, setSimPrimaryColor] = React.useState('#2563EB');
+        const [simTypeScale, setSimTypeScale] = React.useState(1.25);
+        const [simHeadingWeight, setSimHeadingWeight] = React.useState('700');
+        const [simFixFlowFriction, setSimFixFlowFriction] = React.useState(false);
 
-  // SUS Tool State inside Simulator
-  const [susAnswers, setSusAnswers] = useState([3,3,3,3,3,3,3,3,3,3]);
+        // SUS Tool inside simulator
+        const [susAnswers, setSusAnswers] = React.useState([3,3,3,3,3,3,3,3,3,3]);
 
-  // AI Mentor Chat Simulation State
-  const [aiMessages, setAiMessages] = useState([
-    { sender: 'ai', text: 'Halo! Saya AI Design Mentor DKV Anda. Silakan tanyakan konsep UI/UX, minta ide layout, atau evaluasi prompt koding antarmuka!' }
-  ]);
-  const [inputPrompt, setInputPrompt] = useState('');
-  const [aiLoading, setAiLoading] = useState(false);
+        // AI Mentor State
+        const [aiMessages, setAiMessages] = React.useState([
+          { sender: 'ai', text: 'Halo! Saya AI Design Mentor DKV Anda. Silakan tanyakan konsep UI/UX, minta ide layout, atau evaluasi prompt koding antarmuka!' }
+        ]);
+        const [inputPrompt, setInputPrompt] = React.useState('');
+        const [aiLoading, setAiLoading] = React.useState(false);
 
-  // Handle Login
-  const handleLogin = (e) => {
-    e.preventDefault();
-    if (user.name.trim() && user.absent.trim()) {
-      setUser(prev => ({ ...prev, loggedIn: true }));
-    }
-  };
-
-  const textContrast = useMemo(() => {
-    return calculateContrastRatio(simTextColor, simCardBg).toFixed(2);
-  }, [simTextColor, simCardBg]);
-
-  const primaryContrast = useMemo(() => {
-    return calculateContrastRatio('#FFFFFF', simPrimaryColor).toFixed(2);
-  }, [simPrimaryColor]);
-
-  // Handle Quiz Selection & Submission
-  const handleAnswerSelect = (qId, optionIdx) => {
-    if (quizSubmitted) return;
-    setQuizAnswers(prev => ({ ...prev, [qId]: optionIdx }));
-  };
-
-  const calculateModuleQuiz = (modIdx) => {
-    const modQuizzes = CURRICULUM[modIdx].quiz;
-    let correctCount = 0;
-    modQuizzes.forEach(q => {
-      if (quizAnswers[q.id] === q.correct) correctCount++;
-    });
-    const score = Math.round((correctCount / modQuizzes.length) * 100);
-    
-    setModuleScores(prev => {
-      const updated = { ...prev, [`m${modIdx + 1}`]: score };
-      
-      // Update DB record for current student if logged in
-      if (user.loggedIn) {
-        const total = Math.round(
-          ((updated.m1 || 0) + (updated.m2 || 0) + (updated.m3 || 0) + (updated.m4 || 0)) / 4
-        );
-        const newRecord = {
-          id: `STD-${Date.now().toString().slice(-3)}`,
-          name: user.name,
-          class: user.class,
-          absent: user.absent,
-          scoreM1: updated.m1 ?? 0,
-          scoreM2: updated.m2 ?? 0,
-          scoreM3: updated.m3 ?? 0,
-          scoreM4: updated.m4 ?? 0,
-          totalScore: total,
-          susSimScore: calculateSusScore(),
-          status: total >= 75 ? "Tuntas" : "Remedial"
+        const handleLogin = (e) => {
+          e.preventDefault();
+          if (user.name.trim() && user.absent.trim()) {
+            setUser(prev => ({ ...prev, loggedIn: true }));
+          }
         };
 
-        setStudentDb(prevDb => {
-          const idx = prevDb.findIndex(s => s.name.toLowerCase() === user.name.toLowerCase() && s.absent === user.absent);
-          if (idx >= 0) {
-            const clone = [...prevDb];
-            clone[idx] = newRecord;
-            return clone;
-          } else {
-            return [newRecord, ...prevDb];
-          }
-        });
-      }
-      return updated;
-    });
-    setQuizSubmitted(true);
-  };
+        const textContrast = React.useMemo(() => {
+          return calculateContrastRatio(simTextColor, simCardBg).toFixed(2);
+        }, [simTextColor, simCardBg]);
 
-  // SUS Score Calculation
-  const calculateSusScore = () => {
-    // Formula: Odd items (1,3,5,7,9) = val - 1; Even items (2,4,6,8,10) = 5 - val
-    let score = 0;
-    susAnswers.forEach((val, idx) => {
-      if ((idx + 1) % 2 !== 0) {
-        score += (val - 1);
-      } else {
-        score += (5 - val);
-      }
-    });
-    return Math.round(score * 2.5);
-  };
+        const handleAnswerSelect = (qId, optionIdx) => {
+          if (quizSubmitted) return;
+          setQuizAnswers(prev => ({ ...prev, [qId]: optionIdx }));
+        };
 
-  const handleSendAiPrompt = (e) => {
-    e.preventDefault();
-    if (!inputPrompt.trim()) return;
+        const calculateSusScore = () => {
+          let score = 0;
+          susAnswers.forEach((val, idx) => {
+            if ((idx + 1) % 2 !== 0) score += (val - 1);
+            else score += (5 - val);
+          });
+          return Math.round(score * 2.5);
+        };
 
-    const userText = inputPrompt;
-    setAiMessages(prev => [...prev, { sender: 'user', text: userText }]);
-    setInputPrompt('');
-    setAiLoading(true);
-
-    setTimeout(() => {
-      let reply = "";
-      const lower = userText.toLowerCase();
-      if (lower.includes('persona') || lower.includes('user')) {
-        reply = "Untuk menyusun User Persona DKV yang tajam: pastikan mengelompokkan data berdasarkan 4 pilar (Demografi, Goals, Frustrations, & Key Motivations). Hindari membuat asumsi pribadi tanpa wawancara nyata!";
-      } else if (lower.includes('wcag') || lower.includes('kontras') || lower.includes('warna')) {
-        reply = "Rasio kontras minimal WCAG AA untuk teks biasa adalah 4.5:1, sedangkan teks besar (minimal 18pt bold) adalah 3.0:1. Gunakan palet dengan perbandingan luminansi tinggi untuk elemen kritis seperti CTA Button.";
-      } else if (lower.includes('grid') || lower.includes('responsive')) {
-        reply = "Pada tampilan Mobile gunakan 4 kolom (margin 16px), Tablet 8 kolom (margin 24px), dan Desktop 12 kolom (margin 32-64px). Ini memastikan keterbacaan yang responsif dan fleksibel.";
-      } else {
-        reply = `Pertanyaan bagus mengenai "${userText}". Dalam prinsip DKV UI/UX modern, selalu utamakan fungsi (Usability) terlebih dahulu sebelum mempercantik visual (Estetika). Gunakan kontras hirarki yang jelas agar alur baca mata pengguna (Eye-tracking Z/F pattern) alami.`;
-      }
-      setAiMessages(prev => [...prev, { sender: 'ai', text: reply }]);
-      setAiLoading(false);
-    }, 1000);
-  };
-
-  if (!user.loggedIn) {
-    return (
-      <div className="min-h-screen bg-slate-900 text-slate-100 flex flex-col justify-center items-center p-4">
-        <div className="max-w-md w-full bg-slate-800 border border-slate-700 rounded-2xl p-8 shadow-2xl relative overflow-hidden">
-          <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500" />
+        const calculateModuleQuiz = (modIdx) => {
+          const modQuizzes = CURRICULUM[modIdx].quiz;
+          let correctCount = 0;
+          modQuizzes.forEach(q => {
+            if (quizAnswers[q.id] === q.correct) correctCount++;
+          });
+          const score = Math.round((correctCount / modQuizzes.length) * 100);
           
-          <div className="flex items-center gap-3 mb-6">
-            <div className="p-3 bg-blue-600/20 text-blue-400 rounded-xl border border-blue-500/30">
-              <Sparkles className="w-8 h-8" />
-            </div>
-            <div>
-              <h1 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-indigo-300">
-                MPI UI/UX DKV
-              </h1>
-              <p className="text-xs text-slate-400">Media Pembelajaran Interaktif (Fase F - SMK)</p>
-            </div>
-          </div>
+          setModuleScores(prev => {
+            const updated = { ...prev, [`m${modIdx + 1}`]: score };
+            if (user.loggedIn) {
+              const total = Math.round(
+                ((updated.m1 || 0) + (updated.m2 || 0) + (updated.m3 || 0) + (updated.m4 || 0)) / 4
+              );
+              const newRecord = {
+                id: `STD-${Date.now().toString().slice(-3)}`,
+                name: user.name,
+                class: user.class,
+                absent: user.absent,
+                scoreM1: updated.m1 ?? 0,
+                scoreM2: updated.m2 ?? 0,
+                scoreM3: updated.m3 ?? 0,
+                scoreM4: updated.m4 ?? 0,
+                totalScore: total,
+                susSimScore: calculateSusScore(),
+                status: total >= 75 ? "Tuntas" : "Remedial"
+              };
 
-          <div className="mb-6 bg-slate-900/60 p-4 rounded-xl border border-slate-700/50 text-xs text-slate-300 space-y-2">
-            <div className="font-semibold text-blue-400 flex items-center gap-1.5">
-              <BookOpen className="w-4 h-4" /> Capaian Pembelajaran DKV:
-            </div>
-            <p>Penerapan prinsip UI/UX, User Persona, Wireframing, Hi-Fi Layout System, Prototyping Interaktif, hingga Usability Testing (SUS).</p>
-          </div>
+              setStudentDb(prevDb => {
+                const idx = prevDb.findIndex(s => s.name.toLowerCase() === user.name.toLowerCase() && s.absent === user.absent);
+                if (idx >= 0) {
+                  const clone = [...prevDb];
+                  clone[idx] = newRecord;
+                  return clone;
+                } else {
+                  return [newRecord, ...prevDb];
+                }
+              });
+            }
+            return updated;
+          });
+          setQuizSubmitted(true);
+        };
 
-          <form onSubmit={handleLogin} className="space-y-4">
-            <div>
-              <label className="block text-xs font-semibold text-slate-300 mb-1">Nama Lengkap Siswa</label>
-              <input 
-                type="text" 
-                required
-                value={user.name}
-                onChange={e => setUser({...user, name: e.target.value})}
-                placeholder="Contoh: Maya Putri"
-                className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-blue-500 transition"
-              />
-            </div>
+        const handleSendAiPrompt = (e) => {
+          e.preventDefault();
+          if (!inputPrompt.trim()) return;
 
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-xs font-semibold text-slate-300 mb-1">Kelas DKV</label>
-                <select 
-                  value={user.class}
-                  onChange={e => setUser({...user, class: e.target.value})}
-                  className="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2.5 text-sm text-white focus:outline-none focus:border-blue-500 transition"
-                >
-                  <option value="XI DKV 1">XI DKV 1</option>
-                  <option value="XI DKV 2">XI DKV 2</option>
-                  <option value="XII DKV 1">XII DKV 1</option>
-                  <option value="XII DKV 2">XII DKV 2</option>
-                </select>
-              </div>
+          const userText = inputPrompt;
+          setAiMessages(prev => [...prev, { sender: 'user', text: userText }]);
+          setInputPrompt('');
+          setAiLoading(true);
 
-              <div>
-                <label className="block text-xs font-semibold text-slate-300 mb-1">No. Absen</label>
-                <input 
-                  type="number" 
-                  required
-                  min="1"
-                  max="50"
-                  value={user.absent}
-                  onChange={e => setUser({...user, absent: e.target.value})}
-                  placeholder="01"
-                  className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-blue-500 transition"
-                />
-              </div>
-            </div>
+          setTimeout(() => {
+            let reply = "";
+            const lower = userText.toLowerCase();
+            if (lower.includes('persona') || lower.includes('user')) {
+              reply = "Untuk menyusun User Persona DKV yang tajam: pastikan mengelompokkan data berdasarkan 4 pilar (Demografi, Goals, Frustrations, & Key Motivations). Hindari membuat asumsi pribadi tanpa wawancara nyata!";
+            } else if (lower.includes('wcag') || lower.includes('kontras') || lower.includes('warna')) {
+              reply = "Rasio kontras minimal WCAG AA untuk teks biasa adalah 4.5:1, sedangkan teks besar (minimal 18pt bold) adalah 3.0:1. Gunakan palet dengan perbandingan luminansi tinggi untuk elemen kritis seperti CTA Button.";
+            } else if (lower.includes('grid') || lower.includes('responsive')) {
+              reply = "Pada tampilan Mobile gunakan 4 kolom (margin 16px), Tablet 8 kolom (margin 24px), dan Desktop 12 kolom (margin 32-64px). Ini memastikan keterbacaan yang responsif dan fleksibel.";
+            } else {
+              reply = `Pertanyaan bagus mengenai "${userText}". Dalam prinsip DKV UI/UX modern, selalu utamakan fungsi (Usability) terlebih dahulu sebelum mempercantik visual (Estetika). Gunakan kontras hirarki yang jelas agar alur baca mata pengguna (Eye-tracking Z/F pattern) alami.`;
+            }
+            setAiMessages(prev => [...prev, { sender: 'ai', text: reply }]);
+            setAiLoading(false);
+          }, 800);
+        };
 
-            <button 
-              type="submit"
-              className="w-full mt-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-semibold py-3 rounded-xl shadow-lg shadow-blue-600/25 transition duration-200 flex items-center justify-center gap-2 text-sm"
-            >
-              Masuk Laboratorium MPI <ChevronRight className="w-4 h-4" />
-            </button>
-          </form>
+        const exportToCSV = () => {
+          let csvContent = "data:text/csv;charset=utf-8,ID,Nama,Kelas,Absen,M1,M2,M3,M4,SUS_Score,Total_Rata,Status\n";
+          studentDb.forEach(st => {
+            csvContent += `${st.id},"${st.name}","${st.class}",${st.absent},${st.scoreM1},${st.scoreM2},${st.scoreM3},${st.scoreM4},${st.susSimScore},${st.totalScore},${st.status}\n`;
+          });
+          const encodedUri = encodeURI(csvContent);
+          const link = document.createElement("a");
+          link.setAttribute("href", encodedUri);
+          link.setAttribute("download", `Rekap_Nilai_MPI_UIUX_DKV_${new Date().toISOString().slice(0,10)}.csv`);
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+        };
 
-          <p className="text-[10px] text-center text-slate-500 mt-6">
-            Terimplementasi Deep Learning Pedagogy & PhET-Style Real-time Simulator
-          </p>
-        </div>
-      </div>
-    );
-  }
+        // Render Login Screen if not logged in
+        if (!user.loggedIn) {
+          return (
+            <div className="min-h-screen bg-slate-900 text-slate-100 flex flex-col justify-center items-center p-4">
+              <div className="max-w-md w-full bg-slate-800 border border-slate-700 rounded-2xl p-8 shadow-2xl relative overflow-hidden">
+                <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500" />
+                
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="p-3 bg-blue-600/20 text-blue-400 rounded-xl border border-blue-500/30">
+                    <Icon name="Sparkles" className="w-8 h-8" />
+                  </div>
+                  <div>
+                    <h1 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-indigo-300">
+                      MPI UI/UX DKV
+                    </h1>
+                    <p className="text-xs text-slate-400">Media Pembelajaran Interaktif (Fase F - SMK)</p>
+                  </div>
+                </div>
 
-  return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans">
-      {/* Top Header */}
-      <header className="bg-slate-900 border-b border-slate-800 sticky top-0 z-50 px-4 py-3">
-        <div className="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-blue-600/20 text-blue-400 rounded-lg border border-blue-500/30">
-              <Layers className="w-5 h-5" />
-            </div>
-            <div>
-              <h1 className="font-bold text-base text-white flex items-center gap-2">
-                MPI UI/UX DKV <span className="text-[10px] font-normal px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-300 border border-blue-500/30">Fase F SMK</span>
-              </h1>
-              <p className="text-xs text-slate-400 hidden sm:block">Deep Learning & PhET Simulator Interactive Platform</p>
-            </div>
-          </div>
+                <div className="mb-6 bg-slate-900/60 p-4 rounded-xl border border-slate-700/50 text-xs text-slate-300 space-y-2">
+                  <div className="font-semibold text-blue-400 flex items-center gap-1.5">
+                    <Icon name="BookOpen" className="w-4 h-4" /> Capaian Pembelajaran DKV:
+                  </div>
+                  <p>Penerapan prinsip UI/UX, User Persona, Wireframing, Hi-Fi Layout System, Prototyping Interaktif, hingga Usability Testing (SUS).</p>
+                </div>
 
-          {/* User Badge Info */}
-          <div className="flex items-center gap-3 bg-slate-800/80 px-3 py-1.5 rounded-xl border border-slate-700/60 text-xs">
-            <div className="w-7 h-7 rounded-full bg-gradient-to-tr from-blue-500 to-indigo-500 flex items-center justify-center font-bold text-white text-xs">
-              {user.name.charAt(0).toUpperCase()}
-            </div>
-            <div className="text-left">
-              <div className="font-semibold text-slate-200">{user.name}</div>
-              <div className="text-[10px] text-slate-400">{user.class} • Absen: {user.absent}</div>
-            </div>
-          </div>
-        </div>
-      </header>
-
-      {/* Navigation Tabs */}
-      <nav className="bg-slate-900/60 border-b border-slate-800/80 px-4">
-        <div className="max-w-7xl mx-auto flex gap-1 overflow-x-auto py-2 scrollbar-none">
-          <button
-            onClick={() => setActiveTab('materi')}
-            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition ${
-              activeTab === 'materi' 
-                ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/30' 
-                : 'text-slate-400 hover:text-white hover:bg-slate-800/60'
-            }`}
-          >
-            <BookOpen className="w-4 h-4" /> Modul Materi (1-4)
-          </button>
-
-          <button
-            onClick={() => setActiveTab('simulator')}
-            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition ${
-              activeTab === 'simulator' 
-                ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/30' 
-                : 'text-slate-400 hover:text-white hover:bg-slate-800/60'
-            }`}
-          >
-            <Sliders className="w-4 h-4" /> PhET UI/UX Simulator
-          </button>
-
-          <button
-            onClick={() => setActiveTab('quiz')}
-            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition ${
-              activeTab === 'quiz' 
-                ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/30' 
-                : 'text-slate-400 hover:text-white hover:bg-slate-800/60'
-            }`}
-          >
-            <CheckCircle className="w-4 h-4" /> Asesmen HOTS
-          </button>
-
-          <button
-            onClick={() => setActiveTab('ai-mentor')}
-            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition ${
-              activeTab === 'ai-mentor' 
-                ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/30' 
-                : 'text-slate-400 hover:text-white hover:bg-slate-800/60'
-            }`}
-          >
-            <Sparkles className="w-4 h-4" /> AI Coding & Mentor
-          </button>
-
-          <button
-            onClick={() => setActiveTab('database')}
-            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition ${
-              activeTab === 'database' 
-                ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/30' 
-                : 'text-slate-400 hover:text-white hover:bg-slate-800/60'
-            }`}
-          >
-            <Database className="w-4 h-4" /> Rekap Database Siswa
-          </button>
-        </div>
-      </nav>
-
-      {/* Main Content Body */}
-      <main className="flex-1 max-w-7xl w-full mx-auto p-4 md:p-6">
-        
-        {/* TAB 1: MODUL MATERI DEEP LEARNING */}
-        {activeTab === 'materi' && (
-          <div className="space-y-6">
-            {/* Module Selector Pills */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-              {CURRICULUM.map((mod, idx) => (
-                <button
-                  key={mod.id}
-                  onClick={() => { setCurrentModuleIdx(idx); setQuizSubmitted(false); }}
-                  className={`p-3 text-left rounded-xl border text-xs font-medium transition flex flex-col justify-between ${
-                    currentModuleIdx === idx 
-                      ? 'bg-blue-900/40 border-blue-500/80 text-white shadow-md' 
-                      : 'bg-slate-900/60 border-slate-800 text-slate-400 hover:border-slate-700'
-                  }`}
-                >
-                  <span className="text-[10px] uppercase tracking-wider font-semibold text-blue-400 mb-1">Materi {idx + 1}</span>
-                  <span className="line-clamp-2 font-semibold text-slate-200">{mod.badge}</span>
-                </button>
-              ))}
-            </div>
-
-            {/* Active Module Content */}
-            {(() => {
-              const currentMod = CURRICULUM[currentModuleIdx];
-              return (
-                <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-6">
-                  <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-800 pb-4">
-                    <div>
-                      <span className="px-2.5 py-1 rounded-full bg-blue-500/10 text-blue-400 border border-blue-500/20 text-xs font-semibold">
-                        {currentMod.badge}
-                      </span>
-                      <h2 className="text-xl font-bold text-white mt-2">{currentMod.title}</h2>
-                      <p className="text-xs text-slate-400 mt-1">{currentMod.description}</p>
-                    </div>
-                    <button
-                      onClick={() => setActiveTab('simulator')}
-                      className="flex items-center gap-2 bg-indigo-600/20 hover:bg-indigo-600/30 text-indigo-300 border border-indigo-500/40 px-3 py-2 rounded-xl text-xs font-semibold transition"
-                    >
-                      <Play className="w-3.5 h-3.5" /> Uji di Simulator PhET
-                    </button>
+                <form onSubmit={handleLogin} className="space-y-4">
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-300 mb-1">Nama Lengkap Siswa</label>
+                    <input 
+                      type="text" 
+                      required
+                      value={user.name}
+                      onChange={e => setUser({...user, name: e.target.value})}
+                      placeholder="Contoh: Maya Putri"
+                      className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-blue-500 transition"
+                    />
                   </div>
 
-                  {/* Concepts Cards */}
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    {currentMod.concepts.map((c, i) => (
-                      <div key={i} className="bg-slate-950/60 p-4 rounded-xl border border-slate-800 text-xs space-y-2">
-                        <div className="font-semibold text-blue-300 flex items-center gap-1.5">
-                          <Check className="w-3.5 h-3.5 text-blue-400" /> {c.topic}
-                        </div>
-                        <p className="text-slate-300 leading-relaxed">{c.text}</p>
-                      </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-300 mb-1">Kelas DKV</label>
+                      <select 
+                        value={user.class}
+                        onChange={e => setUser({...user, class: e.target.value})}
+                        className="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2.5 text-sm text-white focus:outline-none focus:border-blue-500 transition"
+                      >
+                        <option value="XI DKV 1">XI DKV 1</option>
+                        <option value="XI DKV 2">XI DKV 2</option>
+                        <option value="XII DKV 1">XII DKV 1</option>
+                        <option value="XII DKV 2">XII DKV 2</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-300 mb-1">No. Absen</label>
+                      <input 
+                        type="number" 
+                        required
+                        min="1"
+                        max="50"
+                        value={user.absent}
+                        onChange={e => setUser({...user, absent: e.target.value})}
+                        placeholder="01"
+                        className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-blue-500 transition"
+                      />
+                    </div>
+                  </div>
+
+                  <button 
+                    type="submit"
+                    className="w-full mt-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-semibold py-3 rounded-xl shadow-lg shadow-blue-600/25 transition duration-200 flex items-center justify-center gap-2 text-sm cursor-pointer"
+                  >
+                    Masuk Laboratorium MPI <Icon name="ChevronRight" className="w-4 h-4" />
+                  </button>
+                </form>
+
+                <p className="text-[10px] text-center text-slate-500 mt-6">
+                  Terimplementasi Deep Learning Pedagogy & PhET-Style Real-time Simulator
+                </p>
+              </div>
+            </div>
+          );
+        }
+
+        return (
+          <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans">
+            {/* Header */}
+            <header className="bg-slate-900 border-b border-slate-800 sticky top-0 z-50 px-4 py-3">
+              <div className="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-4">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-blue-600/20 text-blue-400 rounded-lg border border-blue-500/30">
+                    <Icon name="Layers" className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h1 className="font-bold text-base text-white flex items-center gap-2">
+                      MPI UI/UX DKV <span className="text-[10px] font-normal px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-300 border border-blue-500/30">Fase F SMK</span>
+                    </h1>
+                    <p className="text-xs text-slate-400 hidden sm:block">Deep Learning & PhET Simulator Interactive Platform</p>
+                  </div>
+                </div>
+
+                {/* User Badge Info */}
+                <div className="flex items-center gap-3 bg-slate-800/80 px-3 py-1.5 rounded-xl border border-slate-700/60 text-xs">
+                  <div className="w-7 h-7 rounded-full bg-gradient-to-tr from-blue-500 to-indigo-500 flex items-center justify-center font-bold text-white text-xs">
+                    {user.name.charAt(0).toUpperCase()}
+                  </div>
+                  <div className="text-left">
+                    <div className="font-semibold text-slate-200">{user.name}</div>
+                    <div className="text-[10px] text-slate-400">{user.class} • Absen: {user.absent}</div>
+                  </div>
+                </div>
+              </div>
+            </header>
+
+            {/* Navigation Bar */}
+            <nav className="bg-slate-900/60 border-b border-slate-800/80 px-4">
+              <div className="max-w-7xl mx-auto flex gap-1 overflow-x-auto py-2 scrollbar-none">
+                <button
+                  onClick={() => setActiveTab('materi')}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition cursor-pointer ${
+                    activeTab === 'materi' ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/30' : 'text-slate-400 hover:text-white hover:bg-slate-800/60'
+                  }`}
+                >
+                  <Icon name="BookOpen" className="w-4 h-4" /> Modul Materi (1-4)
+                </button>
+
+                <button
+                  onClick={() => setActiveTab('simulator')}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition cursor-pointer ${
+                    activeTab === 'simulator' ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/30' : 'text-slate-400 hover:text-white hover:bg-slate-800/60'
+                  }`}
+                >
+                  <Icon name="Sliders" className="w-4 h-4" /> PhET UI/UX Simulator
+                </button>
+
+                <button
+                  onClick={() => setActiveTab('quiz')}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition cursor-pointer ${
+                    activeTab === 'quiz' ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/30' : 'text-slate-400 hover:text-white hover:bg-slate-800/60'
+                  }`}
+                >
+                  <Icon name="CheckCircle" className="w-4 h-4" /> Asesmen HOTS
+                </button>
+
+                <button
+                  onClick={() => setActiveTab('ai-mentor')}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition cursor-pointer ${
+                    activeTab === 'ai-mentor' ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/30' : 'text-slate-400 hover:text-white hover:bg-slate-800/60'
+                  }`}
+                >
+                  <Icon name="Sparkles" className="w-4 h-4" /> AI Coding & Mentor
+                </button>
+
+                <button
+                  onClick={() => setActiveTab('database')}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition cursor-pointer ${
+                    activeTab === 'database' ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/30' : 'text-slate-400 hover:text-white hover:bg-slate-800/60'
+                  }`}
+                >
+                  <Icon name="Database" className="w-4 h-4" /> Rekap Database Siswa
+                </button>
+              </div>
+            </nav>
+
+            {/* Main Content Area */}
+            <main className="flex-1 max-w-7xl w-full mx-auto p-4 md:p-6">
+              
+              {/* TAB 1: MODUL MATERI DEEP LEARNING */}
+              {activeTab === 'materi' && (
+                <div className="space-y-6">
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                    {CURRICULUM.map((mod, idx) => (
+                      <button
+                        key={mod.id}
+                        onClick={() => { setCurrentModuleIdx(idx); setQuizSubmitted(false); }}
+                        className={`p-3 text-left rounded-xl border text-xs font-medium transition cursor-pointer flex flex-col justify-between ${
+                          currentModuleIdx === idx 
+                            ? 'bg-blue-900/40 border-blue-500/80 text-white shadow-md' 
+                            : 'bg-slate-900/60 border-slate-800 text-slate-400 hover:border-slate-700'
+                        }`}
+                      >
+                        <span className="text-[10px] uppercase tracking-wider font-semibold text-blue-400 mb-1">Materi {idx + 1}</span>
+                        <span className="line-clamp-2 font-semibold text-slate-200">{mod.badge}</span>
+                      </button>
                     ))}
                   </div>
 
-                  {/* Deep Learning Reflektif Box */}
-                  <div className="bg-gradient-to-r from-amber-500/10 to-orange-500/10 border border-amber-500/30 p-4 rounded-xl text-xs space-y-2">
-                    <div className="flex items-center gap-2 text-amber-400 font-bold">
-                      <Sparkles className="w-4 h-4" /> Integrasi Pembelajaran Mendalam (Deep Learning):
-                    </div>
-                    <p className="text-slate-300">
-                      Diskusikan bersama kelompok Anda: Bagaimana mengaitkan riset persona dengan kebutuhan aksesibilitas penyandang disabilitas (inclusivity design)? Tuliskan jawaban pemikiran kritis Anda di catatan perancangan DKV.
-                    </p>
-                  </div>
+                  {(() => {
+                    const currentMod = CURRICULUM[currentModuleIdx];
+                    return (
+                      <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-6">
+                        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-800 pb-4">
+                          <div>
+                            <span className="px-2.5 py-1 rounded-full bg-blue-500/10 text-blue-400 border border-blue-500/20 text-xs font-semibold">
+                              {currentMod.badge}
+                            </span>
+                            <h2 className="text-xl font-bold text-white mt-2">{currentMod.title}</h2>
+                            <p className="text-xs text-slate-400 mt-1">{currentMod.description}</p>
+                          </div>
+                          <button
+                            onClick={() => setActiveTab('simulator')}
+                            className="flex items-center gap-2 bg-indigo-600/20 hover:bg-indigo-600/30 text-indigo-300 border border-indigo-500/40 px-3 py-2 rounded-xl text-xs font-semibold transition cursor-pointer"
+                          >
+                            <Icon name="Play" className="w-3.5 h-3.5" /> Uji di Simulator PhET
+                          </button>
+                        </div>
 
-                  {/* AI Prompt Integration Box */}
-                  <div className="bg-slate-950 p-4 rounded-xl border border-slate-800 text-xs space-y-2">
-                    <div className="flex items-center justify-between text-slate-300">
-                      <span className="font-semibold text-emerald-400 flex items-center gap-1.5">
-                        <Sparkles className="w-3.5 h-3.5" /> Contoh Prompt AI Coding & UX:
-                      </span>
-                      <span className="text-[10px] text-slate-500">Copy & Paste ke menu AI Mentor</span>
-                    </div>
-                    <div className="bg-slate-900 p-3 rounded-lg border border-slate-800 font-mono text-slate-300 text-[11px] select-all">
-                      "{currentMod.aiPromptExample}"
-                    </div>
-                  </div>
-                </div>
-              );
-            })()}
-          </div>
-        )}
-
-        {/* TAB 2: PhET-STYLE INTERACTIVE SIMULATOR */}
-        {activeTab === 'simulator' && (
-          <div className="space-y-6">
-            <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 md:p-6 shadow-xl">
-              <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-800 pb-4 mb-6">
-                <div>
-                  <h2 className="text-lg font-bold text-white flex items-center gap-2">
-                    <Sliders className="w-5 h-5 text-blue-400" /> PhET UI/UX Real-Time Laboratory Simulator
-                  </h2>
-                  <p className="text-xs text-slate-400">
-                    Simulasi fisik antarmuka: Atur Grid, Kontras Warna WCAG, Typography Modular Scale, dan Usability Friction.
-                  </p>
-                </div>
-
-                {/* Viewport Switcher */}
-                <div className="flex items-center gap-1 bg-slate-950 p-1 rounded-xl border border-slate-800 text-xs">
-                  <button
-                    onClick={() => { setSimViewport('mobile'); setSimGridCols(4); }}
-                    className={`flex items-center gap-1 px-3 py-1.5 rounded-lg transition ${simViewport === 'mobile' ? 'bg-blue-600 text-white' : 'text-slate-400 hover:text-white'}`}
-                  >
-                    <Smartphone className="w-3.5 h-3.5" /> Mobile (375px)
-                  </button>
-                  <button
-                    onClick={() => { setSimViewport('tablet'); setSimGridCols(8); }}
-                    className={`flex items-center gap-1 px-3 py-1.5 rounded-lg transition ${simViewport === 'tablet' ? 'bg-blue-600 text-white' : 'text-slate-400 hover:text-white'}`}
-                  >
-                    <Tablet className="w-3.5 h-3.5" /> Tablet (768px)
-                  </button>
-                  <button
-                    onClick={() => { setSimViewport('desktop'); setSimGridCols(12); }}
-                    className={`flex items-center gap-1 px-3 py-1.5 rounded-lg transition ${simViewport === 'desktop' ? 'bg-blue-600 text-white' : 'text-slate-400 hover:text-white'}`}
-                  >
-                    <Monitor className="w-3.5 h-3.5" /> Desktop (1280px)
-                  </button>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-                {/* Control Panel Parameters (Left Column) */}
-                <div className="lg:col-span-5 bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-5 text-xs">
-                  <h3 className="font-bold text-blue-400 uppercase tracking-wider text-[11px] flex items-center gap-1.5">
-                    <Sliders className="w-3.5 h-3.5" /> Parameter Laboratorium
-                  </h3>
-
-                  {/* 1. Grid Controls */}
-                  <div className="space-y-3 border-b border-slate-800 pb-4">
-                    <div className="font-semibold text-slate-200 flex items-center justify-between">
-                      <span className="flex items-center gap-1.5"><Grid className="w-3.5 h-3.5 text-indigo-400" /> Grid Columns</span>
-                      <span className="text-blue-400 font-mono">{simGridCols} Kolom</span>
-                    </div>
-                    <input 
-                      type="range" min="1" max="12" step="1"
-                      value={simGridCols}
-                      onChange={e => setSimGridCols(Number(e.target.value))}
-                      className="w-full accent-blue-500 cursor-pointer"
-                    />
-                    <div className="grid grid-cols-2 gap-2 text-[11px]">
-                      <div>
-                        <span className="text-slate-400">Gap (px):</span>
-                        <input 
-                          type="number" value={simGap} min="0" max="48"
-                          onChange={e => setSimGap(Number(e.target.value))}
-                          className="w-full bg-slate-900 border border-slate-800 rounded px-2 py-1 mt-1 text-slate-200"
-                        />
-                      </div>
-                      <div>
-                        <span className="text-slate-400">Margin (px):</span>
-                        <input 
-                          type="number" value={simMargin} min="0" max="64"
-                          onChange={e => setSimMargin(Number(e.target.value))}
-                          className="w-full bg-slate-900 border border-slate-800 rounded px-2 py-1 mt-1 text-slate-200"
-                        />
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* 2. Color & WCAG Contrast */}
-                  <div className="space-y-3 border-b border-slate-800 pb-4">
-                    <div className="font-semibold text-slate-200 flex items-center justify-between">
-                      <span className="flex items-center gap-1.5"><Palette className="w-3.5 h-3.5 text-pink-400" /> Aksesibilitas Warna WCAG</span>
-                      <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${Number(textContrast) >= 4.5 ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'bg-red-500/20 text-red-400 border border-red-500/30'}`}>
-                        {textContrast}:1 ({Number(textContrast) >= 4.5 ? 'WCAG AA Pass' : 'Fail'})
-                      </span>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-3 text-[11px]">
-                      <div>
-                        <label className="text-slate-400 block mb-1">Teks UI</label>
-                        <input 
-                          type="color" value={simTextColor} 
-                          onChange={e => setSimTextColor(e.target.value)}
-                          className="w-full h-8 bg-slate-900 rounded cursor-pointer border border-slate-800"
-                        />
-                      </div>
-                      <div>
-                        <label className="text-slate-400 block mb-1">Background Kartu</label>
-                        <input 
-                          type="color" value={simCardBg} 
-                          onChange={e => setSimCardBg(e.target.value)}
-                          className="w-full h-8 bg-slate-900 rounded cursor-pointer border border-slate-800"
-                        />
-                      </div>
-                    </div>
-
-                    <div>
-                      <label className="text-slate-400 block mb-1">Warna Aksi Utama (CTA Primary)</label>
-                      <input 
-                        type="color" value={simPrimaryColor} 
-                        onChange={e => setSimPrimaryColor(e.target.value)}
-                        className="w-full h-8 bg-slate-900 rounded cursor-pointer border border-slate-800"
-                      />
-                    </div>
-                  </div>
-
-                  {/* 3. Typography Hierarchy */}
-                  <div className="space-y-3 border-b border-slate-800 pb-4">
-                    <div className="font-semibold text-slate-200 flex items-center justify-between">
-                      <span className="flex items-center gap-1.5"><Type className="w-3.5 h-3.5 text-amber-400" /> Modular Type Scale</span>
-                      <span className="text-amber-400 font-mono">x{simTypeScale}</span>
-                    </div>
-                    <select
-                      value={simTypeScale}
-                      onChange={e => setSimTypeScale(Number(e.target.value))}
-                      className="w-full bg-slate-900 border border-slate-800 rounded px-2.5 py-1.5 text-slate-200"
-                    >
-                      <option value={1.125}>1.125 - Major Second (Kecil)</option>
-                      <option value={1.25}>1.250 - Major Third (Standar UI)</option>
-                      <option value={1.333}>1.333 - Perfect Fourth (Tegas)</option>
-                      <option value={1.618}>1.618 - Golden Ratio (Ekstrim)</option>
-                    </select>
-
-                    <div className="flex items-center justify-between">
-                      <span className="text-slate-400">Weight Heading:</span>
-                      <select
-                        value={simHeadingWeight}
-                        onChange={e => setSimHeadingWeight(e.target.value)}
-                        className="bg-slate-900 border border-slate-800 rounded px-2 py-1 text-slate-200"
-                      >
-                        <option value="400">400 (Regular)</option>
-                        <option value="600">600 (Semi Bold)</option>
-                        <option value="800">800 (Extra Bold)</option>
-                      </select>
-                    </div>
-                  </div>
-
-                  {/* 4. UX Flow Friction Simulation Toggle */}
-                  <div className="space-y-2">
-                    <label className="flex items-center justify-between cursor-pointer p-2 rounded.xl bg-slate-900 border border-slate-800">
-                      <span className="font-semibold text-slate-200 flex items-center gap-2">
-                        <AlertTriangle className="w-4 h-4 text-amber-400" /> Perbaiki UX Friction Flow
-                      </span>
-                      <input 
-                        type="checkbox"
-                        checked={simFixFlowFriction}
-                        onChange={e => setSimFixFlowFriction(e.target.checked)}
-                        className="w-4 h-4 accent-blue-600 rounded cursor-pointer"
-                      />
-                    </label>
-                    <p className="text-[10px] text-slate-400">
-                      Mengaktifkan opsi ini akan memperbesar target sentuh CTA (min 44x44px) dan menyederhanakan hirarki visual.
-                    </p>
-                  </div>
-                </div>
-
-                {/* Real-Time Interactive Canvas Preview (Right Column) */}
-                <div className="lg:col-span-7 flex flex-col items-center justify-start bg-slate-950 p-4 rounded-xl border border-slate-800">
-                  <div className="w-full flex justify-between items-center mb-3">
-                    <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
-                      <Eye className="w-3.5 h-3.5 text-blue-400" /> Canvas Preview Interaktif
-                    </span>
-                    <span className="text-[10px] text-slate-500 font-mono">
-                      Viewport: {simViewport.toUpperCase()} ({simViewport === 'mobile' ? '375px' : simViewport === 'tablet' ? '768px' : '100%'})
-                    </span>
-                  </div>
-
-                  {/* Device Container Frame */}
-                  <div 
-                    className="transition-all duration-300 rounded-2xl overflow-hidden shadow-2xl border-4 border-slate-800 w-full"
-                    style={{
-                      maxWidth: simViewport === 'mobile' ? '360px' : simViewport === 'tablet' ? '600px' : '100%',
-                      backgroundColor: simBgColor
-                    }}
-                  >
-                    {/* Simulated Screen Body */}
-                    <div 
-                      className="p-4 min-h-[420px] flex flex-col justify-between"
-                      style={{ padding: `${simMargin}px` }}
-                    >
-                      {/* Grid Overlay Demo (Visual Grid Lines) */}
-                      <div className="space-y-4">
-                        <div 
-                          className="grid w-full text-center"
-                          style={{ 
-                            gridTemplateColumns: `repeat(${simGridCols}, minmax(0, 1fr))`,
-                            gap: `${simGap}px` 
-                          }}
-                        >
-                          {Array.from({ length: simGridCols }).map((_, idx) => (
-                            <div key={idx} className="bg-blue-500/10 border border-dashed border-blue-400/30 text-[9px] font-mono text-blue-400 rounded py-1">
-                              Col {idx + 1}
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                          {currentMod.concepts.map((c, i) => (
+                            <div key={i} className="bg-slate-950/60 p-4 rounded-xl border border-slate-800 text-xs space-y-2">
+                              <div className="font-semibold text-blue-300 flex items-center gap-1.5">
+                                <Icon name="Check" className="w-3.5 h-3.5 text-blue-400" /> {c.topic}
+                              </div>
+                              <p className="text-slate-300 leading-relaxed">{c.text}</p>
                             </div>
                           ))}
                         </div>
 
-                        {/* Interactive UI Card Mockup */}
-                        <div 
-                          className="rounded-xl p-5 shadow-md transition-all space-y-3"
-                          style={{ 
-                            backgroundColor: simCardBg,
-                            color: simTextColor
-                          }}
+                        <div className="bg-gradient-to-r from-amber-500/10 to-orange-500/10 border border-amber-500/30 p-4 rounded-xl text-xs space-y-2">
+                          <div className="flex items-center gap-2 text-amber-400 font-bold">
+                            <Icon name="Sparkles" className="w-4 h-4" /> Integrasi Pembelajaran Mendalam (Deep Learning):
+                          </div>
+                          <p className="text-slate-300">
+                            Diskusikan bersama kelompok Anda: Bagaimana mengaitkan riset persona dengan kebutuhan aksesibilitas penyandang disabilitas (inclusivity design)? Tuliskan jawaban pemikiran kritis Anda di catatan perancangan DKV.
+                          </p>
+                        </div>
+
+                        <div className="bg-slate-950 p-4 rounded-xl border border-slate-800 text-xs space-y-2">
+                          <div className="flex items-center justify-between text-slate-300">
+                            <span className="font-semibold text-emerald-400 flex items-center gap-1.5">
+                              <Icon name="Sparkles" className="w-3.5 h-3.5" /> Contoh Prompt AI Coding & UX:
+                            </span>
+                            <span className="text-[10px] text-slate-500">Copy & Paste ke menu AI Mentor</span>
+                          </div>
+                          <div className="bg-slate-900 p-3 rounded-lg border border-slate-800 font-mono text-slate-300 text-[11px] select-all">
+                            "{currentMod.aiPromptExample}"
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })()}
+                </div>
+              )}
+
+              {/* TAB 2: PhET SIMULATOR */}
+              {activeTab === 'simulator' && (
+                <div className="space-y-6">
+                  <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 md:p-6 shadow-xl">
+                    <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-800 pb-4 mb-6">
+                      <div>
+                        <h2 className="text-lg font-bold text-white flex items-center gap-2">
+                          <Icon name="Sliders" className="w-5 h-5 text-blue-400" /> PhET UI/UX Real-Time Laboratory Simulator
+                        </h2>
+                        <p className="text-xs text-slate-400">
+                          Simulasi fisik antarmuka: Atur Grid, Kontras Warna WCAG, Typography Modular Scale, dan Usability Friction.
+                        </p>
+                      </div>
+
+                      <div className="flex items-center gap-1 bg-slate-950 p-1 rounded-xl border border-slate-800 text-xs">
+                        <button
+                          onClick={() => { setSimViewport('mobile'); setSimGridCols(4); }}
+                          className={`flex items-center gap-1 px-3 py-1.5 rounded-lg transition cursor-pointer ${simViewport === 'mobile' ? 'bg-blue-600 text-white' : 'text-slate-400 hover:text-white'}`}
                         >
-                          <div className="flex items-center gap-2">
-                            <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
-                            <span className="text-[10px] uppercase font-bold tracking-wider opacity-70">
-                              UI Mockup Card
+                          <Icon name="Smartphone" className="w-3.5 h-3.5" /> Mobile (375px)
+                        </button>
+                        <button
+                          onClick={() => { setSimViewport('tablet'); setSimGridCols(8); }}
+                          className={`flex items-center gap-1 px-3 py-1.5 rounded-lg transition cursor-pointer ${simViewport === 'tablet' ? 'bg-blue-600 text-white' : 'text-slate-400 hover:text-white'}`}
+                        >
+                          <Icon name="Tablet" className="w-3.5 h-3.5" /> Tablet (768px)
+                        </button>
+                        <button
+                          onClick={() => { setSimViewport('desktop'); setSimGridCols(12); }}
+                          className={`flex items-center gap-1 px-3 py-1.5 rounded-lg transition cursor-pointer ${simViewport === 'desktop' ? 'bg-blue-600 text-white' : 'text-slate-400 hover:text-white'}`}
+                        >
+                          <Icon name="Monitor" className="w-3.5 h-3.5" /> Desktop (1280px)
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                      {/* Controls */}
+                      <div className="lg:col-span-5 bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-5 text-xs">
+                        <h3 className="font-bold text-blue-400 uppercase tracking-wider text-[11px] flex items-center gap-1.5">
+                          <Icon name="Sliders" className="w-3.5 h-3.5" /> Parameter Laboratorium
+                        </h3>
+
+                        <div className="space-y-3 border-b border-slate-800 pb-4">
+                          <div className="font-semibold text-slate-200 flex items-center justify-between">
+                            <span className="flex items-center gap-1.5"><Icon name="Grid" className="w-3.5 h-3.5 text-indigo-400" /> Grid Columns</span>
+                            <span className="text-blue-400 font-mono">{simGridCols} Kolom</span>
+                          </div>
+                          <input 
+                            type="range" min="1" max="12" step="1"
+                            value={simGridCols}
+                            onChange={e => setSimGridCols(Number(e.target.value))}
+                            className="w-full accent-blue-500 cursor-pointer"
+                          />
+                          <div className="grid grid-cols-2 gap-2 text-[11px]">
+                            <div>
+                              <span className="text-slate-400">Gap (px):</span>
+                              <input 
+                                type="number" value={simGap} min="0" max="48"
+                                onChange={e => setSimGap(Number(e.target.value))}
+                                className="w-full bg-slate-900 border border-slate-800 rounded px-2 py-1 mt-1 text-slate-200"
+                              />
+                            </div>
+                            <div>
+                              <span className="text-slate-400">Margin (px):</span>
+                              <input 
+                                type="number" value={simMargin} min="0" max="64"
+                                onChange={e => setSimMargin(Number(e.target.value))}
+                                className="w-full bg-slate-900 border border-slate-800 rounded px-2 py-1 mt-1 text-slate-200"
+                              />
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="space-y-3 border-b border-slate-800 pb-4">
+                          <div className="font-semibold text-slate-200 flex items-center justify-between">
+                            <span className="flex items-center gap-1.5"><Icon name="Palette" className="w-3.5 h-3.5 text-pink-400" /> Aksesibilitas Warna WCAG</span>
+                            <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${Number(textContrast) >= 4.5 ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'bg-red-500/20 text-red-400 border border-red-500/30'}`}>
+                              {textContrast}:1 ({Number(textContrast) >= 4.5 ? 'WCAG AA Pass' : 'Fail'})
                             </span>
                           </div>
 
-                          <h4 
-                            className="transition-all leading-tight"
-                            style={{ 
-                              fontSize: `${1 * Math.pow(simTypeScale, 2)}rem`,
-                              fontWeight: simHeadingWeight
-                            }}
-                          >
-                            Kantin Digital DKV
-                          </h4>
+                          <div className="grid grid-cols-2 gap-3 text-[11px]">
+                            <div>
+                              <label className="text-slate-400 block mb-1">Teks UI</label>
+                              <input 
+                                type="color" value={simTextColor} 
+                                onChange={e => setSimTextColor(e.target.value)}
+                                className="w-full h-8 bg-slate-900 rounded cursor-pointer border border-slate-800"
+                              />
+                            </div>
+                            <div>
+                              <label className="text-slate-400 block mb-1">Background Kartu</label>
+                              <input 
+                                type="color" value={simCardBg} 
+                                onChange={e => setSimCardBg(e.target.value)}
+                                className="w-full h-8 bg-slate-900 rounded cursor-pointer border border-slate-800"
+                              />
+                            </div>
+                          </div>
 
-                          <p 
-                            className="leading-relaxed opacity-90"
-                            style={{ fontSize: `${1 * simTypeScale * 0.75}rem` }}
-                          >
-                            Pesan makanan tanpa antre dengan antarmuka presisi tinggi dan terstruktur secara intuitif.
-                          </p>
+                          <div>
+                            <label className="text-slate-400 block mb-1">Warna Aksi Utama (CTA Primary)</label>
+                            <input 
+                              type="color" value={simPrimaryColor} 
+                              onChange={e => setSimPrimaryColor(e.target.value)}
+                              className="w-full h-8 bg-slate-900 rounded cursor-pointer border border-slate-800"
+                            />
+                          </div>
+                        </div>
 
-                          {/* CTA Button with Friction Logic */}
-                          <div className="pt-2">
-                            <button
-                              style={{ 
-                                backgroundColor: simPrimaryColor,
-                                color: '#FFFFFF',
-                                padding: simFixFlowFriction ? '12px 24px' : '4px 8px',
-                                fontSize: simFixFlowFriction ? '14px' : '10px'
-                              }}
-                              className="rounded-lg font-bold shadow-lg transition duration-200 w-full"
+                        <div className="space-y-3 border-b border-slate-800 pb-4">
+                          <div className="font-semibold text-slate-200 flex items-center justify-between">
+                            <span className="flex items-center gap-1.5"><Icon name="Type" className="w-3.5 h-3.5 text-amber-400" /> Modular Type Scale</span>
+                            <span className="text-amber-400 font-mono">x{simTypeScale}</span>
+                          </div>
+                          <select
+                            value={simTypeScale}
+                            onChange={e => setSimTypeScale(Number(e.target.value))}
+                            className="w-full bg-slate-900 border border-slate-800 rounded px-2.5 py-1.5 text-slate-200"
+                          >
+                            <option value={1.125}>1.125 - Major Second (Kecil)</option>
+                            <option value={1.25}>1.250 - Major Third (Standar UI)</option>
+                            <option value={1.333}>1.333 - Perfect Fourth (Tegas)</option>
+                            <option value={1.618}>1.618 - Golden Ratio (Ekstrim)</option>
+                          </select>
+
+                          <div className="flex items-center justify-between">
+                            <span className="text-slate-400">Weight Heading:</span>
+                            <select
+                              value={simHeadingWeight}
+                              onChange={e => setSimHeadingWeight(e.target.value)}
+                              className="bg-slate-900 border border-slate-800 rounded px-2 py-1 text-slate-200"
                             >
-                              {simFixFlowFriction ? 'Pesan Sekarang (Target Sentuh Ideal 48px)' : 'Pesan (Friction: Terlalu Kecil)'}
-                            </button>
+                              <option value="400">400 (Regular)</option>
+                              <option value="600">600 (Semi Bold)</option>
+                              <option value="800">800 (Extra Bold)</option>
+                            </select>
+                          </div>
+                        </div>
+
+                        <div className="space-y-2">
+                          <label className="flex items-center justify-between cursor-pointer p-2 rounded-xl bg-slate-900 border border-slate-800">
+                            <span className="font-semibold text-slate-200 flex items-center gap-2">
+                              <Icon name="AlertTriangle" className="w-4 h-4 text-amber-400" /> Perbaiki UX Friction Flow
+                            </span>
+                            <input 
+                              type="checkbox"
+                              checked={simFixFlowFriction}
+                              onChange={e => setSimFixFlowFriction(e.target.checked)}
+                              className="w-4 h-4 accent-blue-600 rounded cursor-pointer"
+                            />
+                          </label>
+                          <p className="text-[10px] text-slate-400">
+                            Mengaktifkan opsi ini akan memperbesar target sentuh CTA (min 48px) dan menyederhanakan hirarki visual.
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* Canvas Interactive Preview */}
+                      <div className="lg:col-span-7 flex flex-col items-center justify-start bg-slate-950 p-4 rounded-xl border border-slate-800">
+                        <div className="w-full flex justify-between items-center mb-3">
+                          <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+                            <Icon name="Eye" className="w-3.5 h-3.5 text-blue-400" /> Canvas Preview Interaktif
+                          </span>
+                          <span className="text-[10px] text-slate-500 font-mono">
+                            Viewport: {simViewport.toUpperCase()} ({simViewport === 'mobile' ? '375px' : simViewport === 'tablet' ? '768px' : '100%'})
+                          </span>
+                        </div>
+
+                        <div 
+                          className="transition-all duration-300 rounded-2xl overflow-hidden shadow-2xl border-4 border-slate-800 w-full"
+                          style={{
+                            maxWidth: simViewport === 'mobile' ? '360px' : simViewport === 'tablet' ? '600px' : '100%',
+                            backgroundColor: simBgColor
+                          }}
+                        >
+                          <div 
+                            className="p-4 min-h-[420px] flex flex-col justify-between"
+                            style={{ padding: `${simMargin}px` }}
+                          >
+                            <div className="space-y-4">
+                              <div 
+                                className="grid w-full text-center"
+                                style={{ 
+                                  gridTemplateColumns: `repeat(${simGridCols}, minmax(0, 1fr))`,
+                                  gap: `${simGap}px` 
+                                }}
+                              >
+                                {Array.from({ length: simGridCols }).map((_, idx) => (
+                                  <div key={idx} className="bg-blue-500/10 border border-dashed border-blue-400/30 text-[9px] font-mono text-blue-400 rounded py-1">
+                                    Col {idx + 1}
+                                  </div>
+                                ))}
+                              </div>
+
+                              <div 
+                                className="rounded-xl p-5 shadow-md transition-all space-y-3"
+                                style={{ 
+                                  backgroundColor: simCardBg,
+                                  color: simTextColor
+                                }}
+                              >
+                                <div className="flex items-center gap-2">
+                                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
+                                  <span className="text-[10px] uppercase font-bold tracking-wider opacity-70">
+                                    UI Mockup Card
+                                  </span>
+                                </div>
+
+                                <h4 
+                                  className="transition-all leading-tight"
+                                  style={{ 
+                                    fontSize: `${1 * Math.pow(simTypeScale, 2)}rem`,
+                                    fontWeight: simHeadingWeight
+                                  }}
+                                >
+                                  Kantin Digital DKV
+                                </h4>
+
+                                <p 
+                                  className="leading-relaxed opacity-90"
+                                  style={{ fontSize: `${1 * simTypeScale * 0.75}rem` }}
+                                >
+                                  Pesan makanan tanpa antre dengan antarmuka presisi tinggi dan terstruktur secara intuitif.
+                                </p>
+
+                                <div className="pt-2">
+                                  <button
+                                    style={{ 
+                                      backgroundColor: simPrimaryColor,
+                                      color: '#FFFFFF',
+                                      padding: simFixFlowFriction ? '12px 24px' : '4px 8px',
+                                      fontSize: simFixFlowFriction ? '14px' : '10px'
+                                    }}
+                                    className="rounded-lg font-bold shadow-lg transition duration-200 w-full cursor-pointer"
+                                  >
+                                    {simFixFlowFriction ? 'Pesan Sekarang (Target Sentuh Ideal 48px)' : 'Pesan (Friction: Terlalu Kecil)'}
+                                  </button>
+                                </div>
+                              </div>
+                            </div>
+
+                            <div className="mt-4 p-3 bg-slate-900/90 rounded-lg text-slate-300 text-[11px] space-y-1 font-mono border border-slate-800">
+                              <div className="font-bold text-blue-400">Diagnostic UI Metrics:</div>
+                              <div>• Text Contrast: <span className={Number(textContrast) >= 4.5 ? 'text-emerald-400 font-bold' : 'text-red-400 font-bold'}>{textContrast}:1</span></div>
+                              <div>• Heading Size Ratio: <span className="text-amber-400 font-bold">{(1 * Math.pow(simTypeScale, 2)).toFixed(2)}rem</span></div>
+                              <div>• UX Target Touch: <span className={simFixFlowFriction ? 'text-emerald-400 font-bold' : 'text-amber-400 font-bold'}>{simFixFlowFriction ? 'Pass (48px)' : 'Warning (<30px)'}</span></div>
+                            </div>
                           </div>
                         </div>
                       </div>
-
-                      {/* Diagnostic Feedback */}
-                      <div className="mt-4 p-3 bg-slate-900/90 rounded-lg text-slate-300 text-[11px] space-y-1 font-mono border border-slate-800">
-                        <div className="font-bold text-blue-400">Diagnostic UI Metrics:</div>
-                        <div>• Text Contrast: <span className={Number(textContrast) >= 4.5 ? 'text-emerald-400 font-bold' : 'text-red-400 font-bold'}>{textContrast}:1</span></div>
-                        <div>• Heading Size Ratio: <span className="text-amber-400 font-bold">{(1 * Math.pow(simTypeScale, 2)).toFixed(2)}rem</span></div>
-                        <div>• UX Target Touch: <span className={simFixFlowFriction ? 'text-emerald-400 font-bold' : 'text-amber-400 font-bold'}>{simFixFlowFriction ? 'Pass (48px)' : 'Warning (<30px)'}</span></div>
-                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            </div>
-          </div>
-        )}
+              )}
 
-        {/* TAB 3: ASESMEN KUIS HOTS */}
-        {activeTab === 'quiz' && (
-          <div className="space-y-6">
-            <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl">
-              <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-800 pb-4 mb-6">
-                <div>
-                  <h2 className="text-lg font-bold text-white flex items-center gap-2">
-                    <CheckCircle className="w-5 h-5 text-emerald-400" /> Uji Kompetensi HOTS (High Order Thinking Skills)
-                  </h2>
-                  <p className="text-xs text-slate-400">
-                    Modul Terpilih: <span className="text-blue-400 font-semibold">{CURRICULUM[currentModuleIdx].title}</span>
-                  </p>
-                </div>
+              {/* TAB 3: QUIZ HOTS */}
+              {activeTab === 'quiz' && (
+                <div className="space-y-6">
+                  <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl">
+                    <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-800 pb-4 mb-6">
+                      <div>
+                        <h2 className="text-lg font-bold text-white flex items-center gap-2">
+                          <Icon name="CheckCircle" className="w-5 h-5 text-emerald-400" /> Uji Kompetensi HOTS (High Order Thinking Skills)
+                        </h2>
+                        <p className="text-xs text-slate-400">
+                          Modul Terpilih: <span className="text-blue-400 font-semibold">{CURRICULUM[currentModuleIdx].title}</span>
+                        </p>
+                      </div>
 
-                <div className="flex items-center gap-2">
-                  {CURRICULUM.map((_, idx) => (
-                    <button
-                      key={idx}
-                      onClick={() => { setCurrentModuleIdx(idx); setQuizAnswers({}); setQuizSubmitted(false); }}
-                      className={`w-8 h-8 rounded-lg font-bold text-xs transition ${currentModuleIdx === idx ? 'bg-blue-600 text-white' : 'bg-slate-800 text-slate-400 hover:text-white'}`}
-                    >
-                      M{idx + 1}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Questions List */}
-              <div className="space-y-6">
-                {CURRICULUM[currentModuleIdx].quiz.map((q, qIndex) => (
-                  <div key={q.id} className="bg-slate-950 p-5 rounded-xl border border-slate-800 space-y-4">
-                    <div className="flex items-start gap-3">
-                      <span className="w-6 h-6 rounded-full bg-blue-600/20 text-blue-400 border border-blue-500/30 flex items-center justify-center font-bold text-xs shrink-0 mt-0.5">
-                        {qIndex + 1}
-                      </span>
-                      <p className="text-sm font-semibold text-slate-200 leading-relaxed">
-                        {q.question}
-                      </p>
-                    </div>
-
-                    <div className="space-y-2 pl-9">
-                      {q.options.map((opt, optIdx) => {
-                        const isSelected = quizAnswers[q.id] === optIdx;
-                        const isCorrect = q.correct === optIdx;
-                        
-                        let btnStyle = "bg-slate-900 border-slate-800 text-slate-300 hover:border-slate-700";
-                        if (quizSubmitted) {
-                          if (isCorrect) btnStyle = "bg-emerald-950/60 border-emerald-500/80 text-emerald-200 font-semibold";
-                          else if (isSelected && !isCorrect) btnStyle = "bg-red-950/60 border-red-500/80 text-red-200";
-                        } else if (isSelected) {
-                          btnStyle = "bg-blue-900/40 border-blue-500 text-white font-semibold";
-                        }
-
-                        return (
+                      <div className="flex items-center gap-2">
+                        {CURRICULUM.map((_, idx) => (
                           <button
-                            key={optIdx}
-                            disabled={quizSubmitted}
-                            onClick={() => handleAnswerSelect(q.id, optIdx)}
-                            className={`w-full text-left p-3.5 rounded-xl border text-xs transition flex items-center justify-between ${btnStyle}`}
+                            key={idx}
+                            onClick={() => { setCurrentModuleIdx(idx); setQuizAnswers({}); setQuizSubmitted(false); }}
+                            className={`w-8 h-8 rounded-lg font-bold text-xs transition cursor-pointer ${currentModuleIdx === idx ? 'bg-blue-600 text-white' : 'bg-slate-800 text-slate-400 hover:text-white'}`}
                           >
-                            <span>{String.fromCharCode(65 + optIdx)}. {opt}</span>
-                            {quizSubmitted && isCorrect && <Check className="w-4 h-4 text-emerald-400 shrink-0" />}
-                            {quizSubmitted && isSelected && !isCorrect && <X className="w-4 h-4 text-red-400 shrink-0" />}
+                            M{idx + 1}
                           </button>
-                        );
-                      })}
+                        ))}
+                      </div>
                     </div>
 
-                    {/* Explanation Box on Submit */}
-                    {quizSubmitted && (
-                      <div className="ml-9 p-3 rounded-lg bg-blue-950/30 border border-blue-800/40 text-xs text-blue-300 space-y-1">
-                        <div className="font-bold flex items-center gap-1.5 text-blue-400">
-                          <BookOpen className="w-3.5 h-3.5" /> Pembahasan Analisis HOTS:
+                    <div className="space-y-6">
+                      {CURRICULUM[currentModuleIdx].quiz.map((q, qIndex) => (
+                        <div key={q.id} className="bg-slate-950 p-5 rounded-xl border border-slate-800 space-y-4">
+                          <div className="flex items-start gap-3">
+                            <span className="w-6 h-6 rounded-full bg-blue-600/20 text-blue-400 border border-blue-500/30 flex items-center justify-center font-bold text-xs shrink-0 mt-0.5">
+                              {qIndex + 1}
+                            </span>
+                            <p className="text-sm font-semibold text-slate-200 leading-relaxed">
+                              {q.question}
+                            </p>
+                          </div>
+
+                          <div className="space-y-2 pl-9">
+                            {q.options.map((opt, optIdx) => {
+                              const isSelected = quizAnswers[q.id] === optIdx;
+                              const isCorrect = q.correct === optIdx;
+                              
+                              let btnStyle = "bg-slate-900 border-slate-800 text-slate-300 hover:border-slate-700 cursor-pointer";
+                              if (quizSubmitted) {
+                                if (isCorrect) btnStyle = "bg-emerald-950/60 border-emerald-500/80 text-emerald-200 font-semibold";
+                                else if (isSelected && !isCorrect) btnStyle = "bg-red-950/60 border-red-500/80 text-red-200";
+                              } else if (isSelected) {
+                                btnStyle = "bg-blue-900/40 border-blue-500 text-white font-semibold";
+                              }
+
+                              return (
+                                <button
+                                  key={optIdx}
+                                  disabled={quizSubmitted}
+                                  onClick={() => handleAnswerSelect(q.id, optIdx)}
+                                  className={`w-full text-left p-3.5 rounded-xl border text-xs transition flex items-center justify-between ${btnStyle}`}
+                                >
+                                  <span>{String.fromCharCode(65 + optIdx)}. {opt}</span>
+                                  {quizSubmitted && isCorrect && <Icon name="Check" className="w-4 h-4 text-emerald-400 shrink-0" />}
+                                  {quizSubmitted && isSelected && !isCorrect && <Icon name="X" className="w-4 h-4 text-red-400 shrink-0" />}
+                                </button>
+                              );
+                            })}
+                          </div>
+
+                          {quizSubmitted && (
+                            <div className="ml-9 p-3 rounded-lg bg-blue-950/30 border border-blue-800/40 text-xs text-blue-300 space-y-1">
+                              <div className="font-bold flex items-center gap-1.5 text-blue-400">
+                                <Icon name="BookOpen" className="w-3.5 h-3.5" /> Pembahasan Analisis HOTS:
+                              </div>
+                              <p>{q.explanation}</p>
+                            </div>
+                          )}
                         </div>
-                        <p>{q.explanation}</p>
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
+                      ))}
+                    </div>
 
-              {/* Quiz Submit Bar */}
-              <div className="mt-6 pt-4 border-t border-slate-800 flex flex-wrap items-center justify-between gap-4">
-                <button
-                  disabled={quizSubmitted || Object.keys(quizAnswers).length < CURRICULUM[currentModuleIdx].quiz.length}
-                  onClick={() => calculateModuleQuiz(currentModuleIdx)}
-                  className="bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white font-semibold px-6 py-2.5 rounded-xl text-xs shadow-lg shadow-emerald-600/20 transition flex items-center gap-2"
-                >
-                  <Send className="w-4 h-4" /> Simpan & Kirim Jawaban Kuis
-                </button>
+                    <div className="mt-6 pt-4 border-t border-slate-800 flex flex-wrap items-center justify-between gap-4">
+                      <button
+                        disabled={quizSubmitted || Object.keys(quizAnswers).length < CURRICULUM[currentModuleIdx].quiz.length}
+                        onClick={() => calculateModuleQuiz(currentModuleIdx)}
+                        className="bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white font-semibold px-6 py-2.5 rounded-xl text-xs shadow-lg shadow-emerald-600/20 transition flex items-center gap-2 cursor-pointer"
+                      >
+                        <Icon name="Send" className="w-4 h-4" /> Simpan & Kirim Jawaban Kuis
+                      </button>
 
-                {quizSubmitted && (
-                  <div className="flex items-center gap-3">
-                    <span className="text-xs text-slate-400">Skor Modul {currentModuleIdx + 1}:</span>
-                    <span className="text-lg font-bold text-emerald-400 bg-emerald-950/60 px-3 py-1 rounded-lg border border-emerald-500/30">
-                      {moduleScores[`m${currentModuleIdx + 1}`]} / 100
-                    </span>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* TAB 4: AI CODING INTEGRATION & MENTOR */}
-        {activeTab === 'ai-mentor' && (
-          <div className="space-y-6">
-            <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl flex flex-col h-[600px]">
-              <div className="flex items-center justify-between border-b border-slate-800 pb-4 mb-4">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 bg-purple-600/20 text-purple-400 rounded-lg border border-purple-500/30">
-                    <Sparkles className="w-5 h-5" />
-                  </div>
-                  <div>
-                    <h2 className="text-base font-bold text-white">AI Design & Coding Mentor DKV</h2>
-                    <p className="text-xs text-slate-400">Generasi Prompt UI, Analisis Kode HTML/CSS, & Kritik Design System</p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Chat Message History */}
-              <div className="flex-1 overflow-y-auto space-y-4 pr-2 scrollbar-thin">
-                {aiMessages.map((msg, idx) => (
-                  <div key={idx} className={`flex gap-3 ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
-                    {msg.sender === 'ai' && (
-                      <div className="w-7 h-7 rounded-full bg-purple-600/20 border border-purple-500/40 text-purple-300 flex items-center justify-center shrink-0 text-xs font-bold">
-                        AI
-                      </div>
-                    )}
-                    <div className={`max-w-[80%] rounded-2xl p-4 text-xs leading-relaxed ${
-                      msg.sender === 'user' 
-                        ? 'bg-blue-600 text-white rounded-tr-none' 
-                        : 'bg-slate-950 border border-slate-800 text-slate-200 rounded-tl-none'
-                    }`}>
-                      {msg.text}
+                      {quizSubmitted && (
+                        <div className="flex items-center gap-3">
+                          <span className="text-xs text-slate-400">Skor Modul {currentModuleIdx + 1}:</span>
+                          <span className="text-lg font-bold text-emerald-400 bg-emerald-950/60 px-3 py-1 rounded-lg border border-emerald-500/30">
+                            {moduleScores[`m${currentModuleIdx + 1}`]} / 100
+                          </span>
+                        </div>
+                      )}
                     </div>
                   </div>
-                ))}
-                {aiLoading && (
-                  <div className="flex gap-2 items-center text-xs text-slate-500 italic">
-                    <RefreshCw className="w-3.5 h-3.5 animate-spin text-purple-400" /> AI Mentor sedang menganalisis prinsip DKV...
-                  </div>
-                )}
-              </div>
-
-              {/* Input Form */}
-              <form onSubmit={handleSendAiPrompt} className="mt-4 pt-3 border-t border-slate-800 flex gap-2">
-                <input 
-                  type="text"
-                  value={inputPrompt}
-                  onChange={e => setInputPrompt(e.target.value)}
-                  placeholder="Tanyakan konsep UI/UX, masukan prompt HTML/Tailwind, atau analisis WCAG..."
-                  className="flex-1 bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-purple-500 transition"
-                />
-                <button
-                  type="submit"
-                  disabled={aiLoading}
-                  className="bg-purple-600 hover:bg-purple-500 text-white font-semibold px-4 py-2.5 rounded-xl text-xs shadow-lg shadow-purple-600/20 transition flex items-center gap-1.5"
-                >
-                  <Send className="w-4 h-4" /> Kirim
-                </button>
-              </form>
-            </div>
-          </div>
-        )}
-
-        {/* TAB 5: DATABASE & REKAP NILAI SISWA */}
-        {activeTab === 'database' && (
-          <div className="space-y-6">
-            <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl">
-              <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-800 pb-4 mb-6">
-                <div>
-                  <h2 className="text-lg font-bold text-white flex items-center gap-2">
-                    <Database className="w-5 h-5 text-indigo-400" /> Database Live Rekap Hasil Belajar Siswa
-                  </h2>
-                  <p className="text-xs text-slate-400">Pencatatan Nilai Kuis HOTS (M1-M4) & Skor Usability Simulator (SUS)</p>
                 </div>
+              )}
 
-                <div className="flex items-center gap-2">
-                  <span className="text-xs text-slate-400">Total Siswa Terdata: <strong className="text-white">{studentDb.length}</strong></span>
-                </div>
-              </div>
+              {/* TAB 4: AI MENTOR */}
+              {activeTab === 'ai-mentor' && (
+                <div className="space-y-6">
+                  <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl flex flex-col h-[600px]">
+                    <div className="flex items-center justify-between border-b border-slate-800 pb-4 mb-4">
+                      <div className="flex items-center gap-3">
+                        <div className="p-2 bg-purple-600/20 text-purple-400 rounded-lg border border-purple-500/30">
+                          <Icon name="Sparkles" className="w-5 h-5" />
+                        </div>
+                        <div>
+                          <h2 className="text-base font-bold text-white">AI Design & Coding Mentor DKV</h2>
+                          <p className="text-xs text-slate-400">Generasi Prompt UI, Analisis Kode HTML/CSS, & Kritik Design System</p>
+                        </div>
+                      </div>
+                    </div>
 
-              {/* Table */}
-              <div className="overflow-x-auto">
-                <table className="w-full text-left text-xs text-slate-300">
-                  <thead className="bg-slate-950 text-slate-400 uppercase tracking-wider text-[10px] border-b border-slate-800">
-                    <tr>
-                      <th className="p-3">ID Siswa</th>
-                      <th className="p-3">Nama Lengkap</th>
-                      <th className="p-3">Kelas</th>
-                      <th className="p-3">No. Absen</th>
-                      <th className="p-3 text-center">M1</th>
-                      <th className="p-3 text-center">M2</th>
-                      <th className="p-3 text-center">M3</th>
-                      <th className="p-3 text-center">M4</th>
-                      <th className="p-3 text-center">Sim. SUS</th>
-                      <th className="p-3 text-center">Rata-Rata Total</th>
-                      <th className="p-3 text-center">Status</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-800/60">
-                    {studentDb.map((st) => (
-                      <tr key={st.id} className="hover:bg-slate-800/40 transition">
-                        <td className="p-3 font-mono text-slate-500">{st.id}</td>
-                        <td className="p-3 font-semibold text-white">{st.name}</td>
-                        <td className="p-3 text-slate-400">{st.class}</td>
-                        <td className="p-3 text-slate-400 font-mono">{st.absent}</td>
-                        <td className="p-3 text-center font-mono">{st.scoreM1 ?? '-'}</td>
-                        <td className="p-3 text-center font-mono">{st.scoreM2 ?? '-'}</td>
-                        <td className="p-3 text-center font-mono">{st.scoreM3 ?? '-'}</td>
-                        <td className="p-3 text-center font-mono">{st.scoreM4 ?? '-'}</td>
-                        <td className="p-3 text-center font-mono text-indigo-400">{st.susSimScore}</td>
-                        <td className="p-3 text-center font-bold font-mono text-blue-400">{st.totalScore}</td>
-                        <td className="p-3 text-center">
-                          <span className={`px-2 py-0.5 rounded-full text-[10px] font-semibold ${
-                            st.status === 'Tuntas' 
-                              ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' 
-                              : 'bg-amber-500/20 text-amber-400 border border-amber-500/30'
+                    <div className="flex-1 overflow-y-auto space-y-4 pr-2 scrollbar-thin">
+                      {aiMessages.map((msg, idx) => (
+                        <div key={idx} className={`flex gap-3 ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
+                          {msg.sender === 'ai' && (
+                            <div className="w-7 h-7 rounded-full bg-purple-600/20 border border-purple-500/40 text-purple-300 flex items-center justify-center shrink-0 text-xs font-bold">
+                              AI
+                            </div>
+                          )}
+                          <div className={`max-w-[80%] rounded-2xl p-4 text-xs leading-relaxed ${
+                            msg.sender === 'user' ? 'bg-blue-600 text-white rounded-tr-none' : 'bg-slate-950 border border-slate-800 text-slate-200 rounded-tl-none'
                           }`}>
-                            {st.status}
-                          </span>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
+                            {msg.text}
+                          </div>
+                        </div>
+                      ))}
+                      {aiLoading && (
+                        <div className="flex gap-2 items-center text-xs text-slate-500 italic">
+                          <Icon name="RefreshCw" className="w-3.5 h-3.5 animate-spin text-purple-400" /> AI Mentor sedang menganalisis prinsip DKV...
+                        </div>
+                      )}
+                    </div>
+
+                    <form onSubmit={handleSendAiPrompt} className="mt-4 pt-3 border-t border-slate-800 flex gap-2">
+                      <input 
+                        type="text"
+                        value={inputPrompt}
+                        onChange={e => setInputPrompt(e.target.value)}
+                        placeholder="Tanyakan konsep UI/UX, masukan prompt HTML/Tailwind, atau analisis WCAG..."
+                        className="flex-1 bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-purple-500 transition"
+                      />
+                      <button
+                        type="submit"
+                        disabled={aiLoading}
+                        className="bg-purple-600 hover:bg-purple-500 text-white font-semibold px-4 py-2.5 rounded-xl text-xs shadow-lg shadow-purple-600/20 transition flex items-center gap-1.5 cursor-pointer"
+                      >
+                        <Icon name="Send" className="w-4 h-4" /> Kirim
+                      </button>
+                    </form>
+                  </div>
+                </div>
+              )}
+
+              {/* TAB 5: DATABASE */}
+              {activeTab === 'database' && (
+                <div className="space-y-6">
+                  <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl">
+                    <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-800 pb-4 mb-6">
+                      <div>
+                        <h2 className="text-lg font-bold text-white flex items-center gap-2">
+                          <Icon name="Database" className="w-5 h-5 text-indigo-400" /> Database Live Rekap Hasil Belajar Siswa
+                        </h2>
+                        <p className="text-xs text-slate-400">Pencatatan Nilai Kuis HOTS (M1-M4) & Skor Usability Simulator (SUS)</p>
+                      </div>
+
+                      <div className="flex items-center gap-3">
+                        <span className="text-xs text-slate-400">Total Terdata: <strong className="text-white">{studentDb.length}</strong></span>
+                        <button
+                          onClick={exportToCSV}
+                          className="flex items-center gap-1.5 bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 border border-emerald-500/40 px-3 py-1.5 rounded-xl text-xs font-semibold transition cursor-pointer"
+                        >
+                          <Icon name="Download" className="w-3.5 h-3.5" /> Unduh Rekap CSV
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-left text-xs text-slate-300">
+                        <thead className="bg-slate-950 text-slate-400 uppercase tracking-wider text-[10px] border-b border-slate-800">
+                          <tr>
+                            <th className="p-3">ID Siswa</th>
+                            <th className="p-3">Nama Lengkap</th>
+                            <th className="p-3">Kelas</th>
+                            <th className="p-3">No. Absen</th>
+                            <th className="p-3 text-center">M1</th>
+                            <th className="p-3 text-center">M2</th>
+                            <th className="p-3 text-center">M3</th>
+                            <th className="p-3 text-center">M4</th>
+                            <th className="p-3 text-center">Sim. SUS</th>
+                            <th className="p-3 text-center">Rata-Rata Total</th>
+                            <th className="p-3 text-center">Status</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-slate-800/60">
+                          {studentDb.map((st) => (
+                            <tr key={st.id} className="hover:bg-slate-800/40 transition">
+                              <td className="p-3 font-mono text-slate-500">{st.id}</td>
+                              <td className="p-3 font-semibold text-white">{st.name}</td>
+                              <td className="p-3 text-slate-400">{st.class}</td>
+                              <td className="p-3 text-slate-400 font-mono">{st.absent}</td>
+                              <td className="p-3 text-center font-mono">{st.scoreM1 ?? '-'}</td>
+                              <td className="p-3 text-center font-mono">{st.scoreM2 ?? '-'}</td>
+                              <td className="p-3 text-center font-mono">{st.scoreM3 ?? '-'}</td>
+                              <td className="p-3 text-center font-mono">{st.scoreM4 ?? '-'}</td>
+                              <td className="p-3 text-center font-mono text-indigo-400">{st.susSimScore}</td>
+                              <td className="p-3 text-center font-bold font-mono text-blue-400">{st.totalScore}</td>
+                              <td className="p-3 text-center">
+                                <span className={`px-2 py-0.5 rounded-full text-[10px] font-semibold ${
+                                  st.status === 'Tuntas' ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'bg-amber-500/20 text-amber-400 border border-amber-500/30'
+                                }`}>
+                                  {st.status}
+                                </span>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+            </main>
+
+            <footer className="bg-slate-900 border-t border-slate-800 py-4 px-6 text-center text-xs text-slate-500">
+              Media Pembelajaran Interaktif (MPI) DKV UI/UX • Kurikulum Merdeka Fase F SMK • PhET & AI Integration
+            </footer>
           </div>
-        )}
+        );
+      }
 
-      </main>
-
-      {/* Footer */}
-      <footer className="bg-slate-900 border-t border-slate-800 py-4 px-6 text-center text-xs text-slate-500">
-        Media Pembelajaran Interaktif (MPI) DKV UI/UX • Kurikulum Merdeka Fase F SMK • PhET & AI Integration
-      </footer>
-    </div>
-  );
-}
-</script>
+      // Render React App to DOM
+      const root = ReactDOM.createRoot(document.getElementById('root'));
+      root.render(<App />);
+    </script>
+</body>
+</html>
