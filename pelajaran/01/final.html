@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Menu Horizontal 3D</title>
+<style>
+*{box-sizing:border-box}
+html{min-height:100%;background:#080d1b}
+body{
+  min-height:100vh;max-width:1050px;margin:0 auto;padding:70px 28px;
+  color:#dce6f7;font-family:"Segoe UI",Arial,sans-serif;line-height:1.8;
+  background:
+    radial-gradient(ellipse at 15% 10%,rgba(56,189,248,.13),transparent 50%),
+    radial-gradient(ellipse at 90% 70%,rgba(139,92,246,.14),transparent 50%);
+  animation:halaman-masuk 900ms ease-out both;
+}
+body>p:first-of-type{
+  margin:0 0 32px;color:#fff;font-size:clamp(1.6rem,4vw,2.7rem);
+  font-weight:700;line-height:1.3;letter-spacing:-.04em;
+}
+body>p:first-of-type::before{
+  content:"";display:block;width:65px;height:5px;margin-bottom:22px;
+  border-radius:10px;background:linear-gradient(90deg,#38bdf8,#a78bfa);
+  box-shadow:0 0 24px rgba(56,189,248,.5);
+}
+.menu{
+  list-style:none;margin:0 0 40px;padding:28px 22px 18px;
+  border:1px solid rgba(255,255,255,.1);border-radius:24px;
+  background:rgba(255,255,255,.035);
+  box-shadow:0 25px 60px rgba(0,0,0,.25),inset 0 1px 0 rgba(255,255,255,.06);
+  perspective:900px;
+}
+.menu li{
+  display:inline-block;margin:0 12px 18px 0;vertical-align:top;
+  perspective:700px;animation:menu-masuk 700ms ease-out both;
+}
+.menu li:nth-child(2){animation-delay:100ms}
+.menu li:nth-child(3){animation-delay:200ms}
+.menu li:nth-child(4){animation-delay:300ms}
+.menu a{
+  position:relative;display:block;overflow:hidden;padding:15px 23px;
+  border:1px solid rgba(255,255,255,.18);border-radius:13px;
+  color:#ecf8ff;background:linear-gradient(145deg,#253957,#152238);
+  text-decoration:none;font-weight:600;letter-spacing:.02em;
+  box-shadow:0 7px 0 #0b1425,0 11px 0 rgba(56,189,248,.13),
+    0 18px 24px rgba(0,0,0,.35),inset 0 1px 0 rgba(255,255,255,.15);
+  transform:rotateX(8deg);transform-origin:center bottom;
+  transition:transform 350ms cubic-bezier(.2,.8,.2,1),
+    box-shadow 350ms ease,border-color 350ms ease,color 350ms ease;
+}
+.menu a::before{
+  content:"";position:absolute;inset:-70% -50%;pointer-events:none;
+  background:linear-gradient(110deg,transparent 40%,rgba(255,255,255,.28) 50%,transparent 60%);
+  transform:translateX(-100%);transition:transform 650ms ease;
+}
+.menu a::after{
+  content:"";position:absolute;right:20%;bottom:0;left:20%;height:3px;
+  border-radius:5px;background:linear-gradient(90deg,#38bdf8,#c4b5fd);
+  transform:scaleX(0);transition:transform 350ms ease;
+}
+.menu li:hover a,.menu a:focus-visible{
+  color:#fff;border-color:#7dd3fc;
+  transform:translateY(-9px) rotateX(15deg) rotateY(-8deg);
+  box-shadow:3px 10px 0 #0b1425,3px 14px 0 rgba(56,189,248,.22),
+    0 28px 35px rgba(0,0,0,.45),0 0 28px rgba(56,189,248,.18),
+    inset 0 1px 0 rgba(255,255,255,.25);
+}
+.menu li:hover a::before,.menu a:focus-visible::before{transform:translateX(100%)}
+.menu li:hover a::after,.menu a:focus-visible::after{transform:scaleX(1)}
+.menu a:active{
+  transform:translateY(5px) rotateX(0) rotateY(0);
+  box-shadow:0 2px 0 #0b1425,0 6px 12px rgba(0,0,0,.3);
+}
+a{
+  color:#7dd3fc;text-decoration-color:rgba(125,211,252,.35);
+  text-underline-offset:5px;
+  transition:color 250ms ease,text-decoration-color 250ms ease;
+}
+a:hover{color:#c4b5fd;text-decoration-color:currentColor}
+a:focus-visible{outline:2px solid #7dd3fc;outline-offset:6px}
+ol{margin:24px 0 35px;padding-left:30px}
+ol li{
+  margin-bottom:14px;padding:13px 18px;
+  border:1px solid rgba(255,255,255,.07);border-radius:12px;
+  background:rgba(255,255,255,.035);
+  transition:transform 300ms ease,background 300ms ease,border-color 300ms ease;
+}
+ol li::marker{color:#a78bfa;font-weight:700}
+ol li:hover{
+  transform:translateX(8px);border-color:rgba(125,211,252,.3);
+  background:rgba(56,189,248,.08);
+}
+body>p:last-of-type{
+  margin-top:40px;padding-top:22px;
+  border-top:1px solid rgba(255,255,255,.1);font-size:.9rem;
+}
+@keyframes halaman-masuk{
+  from{opacity:0;transform:translateY(18px)}
+  to{opacity:1;transform:translateY(0)}
+}
+@keyframes menu-masuk{
+  from{opacity:0;transform:translateY(24px) rotateX(-35deg)}
+  to{opacity:1;transform:translateY(0) rotateX(0)}
+}
+@media(max-width:600px){
+  body{padding:40px 20px}
+  .menu{padding:20px 14px 10px}
+  .menu li{margin-right:8px}
+  .menu a{padding:12px 16px;font-size:.9rem}
+}
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation:none!important;transition:none!important}
+  .menu a,.menu li:hover a,.menu a:focus-visible,.menu a:active,ol li:hover{transform:none}
+}
+</style>
+</head>
+<body>
+<p>Ini adalah HTML dengan CSS dan Inline-Block.</p>
+
+<ul class="menu">
+  <li><a href="https://mawan.my.id/pelajaran/01/beranda.html">Beranda</a></li>
+  <li><a href="https://mawan.my.id/pelajaran/01/sekolahku.html">Sekolahku</a></li>
+  <li><a href="https://mawan.my.id/pelajaran/01/tentang-saya.html">Tentang Saya</a></li>
+  <li><a href="https://mawan.my.id/pelajaran/01/syair-lagu.html">Syair Lagu</a></li>
+</ul>
+
+<p>Dengan CSS, list di atas dapat diubah menjadi menu horizontal.<br>
+Ada dua cara mengubah list menjadi menu horizontal:</p>
+
+<ol>
+  <li><a href="https://mawan.my.id/pelajaran/01/flexbox.html">Menggunakan Flexbox</a></li>
+  <li><a href="https://mawan.my.id/pelajaran/01/inline-block.html">Menggunakan Inline-block</a></li>
+</ol>
+
+<p><a href="https://mawan.my.id/pelajaran/01/">Kembali ke HTML tanpa CSS.</a></p>
+</body>
+</html>
