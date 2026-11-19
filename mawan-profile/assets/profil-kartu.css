@@ -1,0 +1,20 @@
+.profil-page {
+  background: radial-gradient(ellipse at top left, #e2eedc, transparent 62%), #f7f8f2;
+}
+.profil-card {
+  color: #193d35;
+  border: 1px solid #aebfb1;
+  border-radius: 1rem;
+  overflow: hidden;
+  box-shadow: 1px 1px #a4b8a8, 2px 2px #a4b8a8, 3px 3px #a4b8a8,
+              4px 4px #92a799, 5px 5px #92a799, 8px 16px 24px #153c2b19;
+}
+.profil-card h2 { font-size: clamp(1.8rem, 2.6vw, 2.4rem); margin-bottom: 1rem; }
+.profil-card a { font-weight: 650; text-underline-offset: .2em; }
+.profil-identitas { background: #15483d; color: white; }
+.profil-identitas h2 { font-size: clamp(2.5rem, 4vw, 3.6rem); line-height: 1.03; }
+.profil-mentoring { background: #edf3e6; }
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  .profil-card { transition: transform .22s ease; }
+  .profil-card:hover { transform: perspective(1100px) translateY(-4px) rotateX(1deg) rotateY(-1deg); }
+}
